@@ -1,0 +1,12 @@
+# Required for research agents with external search
+TAVILY_API_KEY=tvly-dev-xxx
+
+# AZURE_OPENAI_API_KEY="xxxxx"
+# AZURE_OPENAI_ENDPOINT="https://ibp-aoai.openai.azure.com/"
+# AZURE_OPENAI_DEPLOYMENT="gpt-4.1"
+# OPENAI_API_VERSION="2024-12-01-preview"
+
+# Optional: For evaluation and tracing
+LANGSMITH_API_KEY=xxxx
+LANGSMITH_TRACING=false
+LANGSMITH_PROJECT=c64vibe
