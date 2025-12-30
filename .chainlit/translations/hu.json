@@ -1,0 +1,245 @@
+{
+    "common": {
+        "actions": {
+            "cancel": "Mégsem",
+            "confirm": "Megerősítés",
+            "continue": "Folytatás",
+            "goBack": "Vissza",
+            "reset": "Visszaállítás",
+            "submit": "Küldés"
+        },
+        "status": {
+            "loading": "Betöltés...",
+            "error": {
+                "default": "Hiba történt",
+                "serverConnection": "Nem sikerült csatlakozni a szerverhez"
+            }
+        }
+    },
+    "auth": {
+        "login": {
+            "title": "Bejelentkezés az alkalmazásba",
+            "form": {
+                "email": {
+                    "label": "E-mail cím",
+                    "required": "az e-mail mező kitöltése kötelező",
+                    "placeholder": "pelda@email.hu"
+                },
+                "password": {
+                    "label": "Jelszó",
+                    "required": "a jelszó mező kitöltése kötelező"
+                },
+                "actions": {
+                    "signin": "Bejelentkezés"
+                },
+                "alternativeText": {
+                    "or": "VAGY"
+                }
+            },
+            "errors": {
+                "default": "Nem sikerült a bejelentkezés",
+                "signin": "Próbáljon meg bejelentkezni egy másik fiókkal",
+                "oauthSignin": "Próbáljon meg bejelentkezni egy másik fiókkal",
+                "redirectUriMismatch": "Az átirányítási URI nem egyezik az oauth alkalmazás konfigurációjával",
+                "oauthCallback": "Próbáljon meg bejelentkezni egy másik fiókkal",
+                "oauthCreateAccount": "Próbáljon meg bejelentkezni egy másik fiókkal",
+                "emailCreateAccount": "Próbáljon meg bejelentkezni egy másik fiókkal",
+                "callback": "Próbáljon meg bejelentkezni egy másik fiókkal",
+                "oauthAccountNotLinked": "Személyazonossága megerősítéséhez jelentkezzen be ugyanazzal a fiókkal, amelyet eredetileg használt",
+                "emailSignin": "Az e-mail nem küldhető el",
+                "emailVerify": "Kérjük, erősítse meg e-mail címét, új e-mailt küldtünk",
+                "credentialsSignin": "A bejelentkezés sikertelen. Ellenőrizze a megadott adatokat",
+                "sessionRequired": "Kérjük, jelentkezzen be az oldal eléréséhez"
+            }
+        },
+        "provider": {
+            "continue": "Folytatás {{provider}} fiókkal"
+        }
+    },
+    "chat": {
+        "input": {
+            "placeholder": "Írja be üzenetét ide...",
+            "actions": {
+                "send": "Üzenet küldése",
+                "stop": "Feladat leállítása",
+                "attachFiles": "Fájlok csatolása"
+            }
+        },
+        "commands": {
+            "button": "Eszközök",
+            "changeTool": "Eszköz váltása",
+            "availableTools": "Elérhető eszközök"
+        },
+        "speech": {
+            "start": "Felvétel indítása",
+            "stop": "Felvétel leállítása",
+            "connecting": "Csatlakozás"
+        },
+        "fileUpload": {
+            "dragDrop": "Húzza ide a fájlokat",
+            "browse": "Fájlok tallózása",
+            "sizeLimit": "Limit:",
+            "errors": {
+                "failed": "Feltöltés sikertelen",
+                "cancelled": "Feltöltés megszakítva:"
+            },
+            "actions": {
+                "cancelUpload": "Feltöltés megszakítása",
+                "removeAttachment": "Melléklet eltávolítása"
+            }
+        },
+        "messages": {
+            "status": {
+                "using": "Használatban",
+                "used": "Használva"
+            },
+            "actions": {
+                "copy": {
+                    "button": "Másolás vágólapra",
+                    "success": "Másolva!"
+                }
+            },
+            "feedback": {
+                "positive": "Hasznos",
+                "negative": "Nem hasznos",
+                "edit": "Visszajelzés szerkesztése",
+                "dialog": {
+                    "title": "Megjegyzés hozzáadása",
+                    "submit": "Visszajelzés küldése",
+                    "yourFeedback": "Az Ön visszajelzése..."
+                },
+                "status": {
+                    "updating": "Frissítés",
+                    "updated": "Visszajelzés frissítve"
+                }
+            }
+        },
+        "history": {
+            "title": "Utolsó bemenetek",
+            "empty": "Még nincs semmi...",
+            "show": "Előzmények megjelenítése"
+        },
+        "settings": {
+            "title": "Beállítások panel",
+            "customize": "Szabja testre a csevegés beállításait"
+        },
+        "watermark": "A mesterséges intelligencia tévedhet. Ellenőrizze a fontos információkat."
+    },
+    "threadHistory": {
+        "sidebar": {
+            "title": "Korábbi beszélgetések",
+            "filters": {
+                "search": "Keresés",
+                "placeholder": "Beszélgetések keresése..."
+            },
+            "timeframes": {
+                "today": "Ma",
+                "yesterday": "Tegnap",
+                "previous7days": "Elmúlt 7 nap",
+                "previous30days": "Elmúlt 30 nap"
+            },
+            "empty": "Nincs találat",
+            "actions": {
+                "close": "Oldalsáv bezárása",
+                "open": "Oldalsáv megnyitása"
+            }
+        },
+        "thread": {
+            "untitled": "Névtelen beszélgetés",
+            "menu": {
+                "rename": "Átnevezés",
+                "share": "Megosztás",
+                "delete": "Törlés"
+            },
+            "actions": {
+                "share": {
+                    "title": "Csevegés linkjének megosztása",
+                    "button": "Megosztás",
+                    "status": {
+                        "copied": "Link másolva",
+                        "created": "Megosztási link létrehozva!",
+                        "unshared": "Megosztás letiltva ennél a beszélgetésnél"
+                    },
+                    "error": {
+                        "create": "Nem sikerült létrehozni a megosztási linket",
+                        "unshare": "Nem sikerült megszüntetni a megosztást"
+                    }
+                },
+                "delete": {
+                    "title": "Törlés megerősítése",
+                    "description": "Ez törli a beszélgetést, valamint annak üzeneteit és elemeit. Ez a művelet nem vonható vissza",
+                    "success": "Csevegés törölve",
+                    "inProgress": "Csevegés törlése folyamatban"
+                },
+                "rename": {
+                    "title": "Beszélgetés átnevezése",
+                    "description": "Adjon meg új nevet ehhez a beszélgetéshez",
+                    "form": {
+                        "name": {
+                            "label": "Név",
+                            "placeholder": "Adja meg az új nevet"
+                        }
+                    },
+                    "success": "Beszélgetés átnevezve!",
+                    "inProgress": "Beszélgetés átnevezése folyamatban"
+                }
+            }
+        }
+    },
+    "navigation": {
+        "header": {
+            "chat": "Csevegés",
+            "readme": "Információ",
+            "theme": {
+                "light": "Világos téma",
+                "dark": "Sötét téma",
+                "system": "Rendszer követése"
+            }
+        },
+        "newChat": {
+            "button": "Új csevegés",
+            "dialog": {
+                "title": "Új csevegés létrehozása",
+                "description": "Ez törli a jelenlegi csevegés előzményeit. Biztosan folytatja?",
+                "tooltip": "Új csevegés"
+            }
+        },
+        "user": {
+            "menu": {
+                "settings": "Beállítások",
+                "settingsKey": "B",
+                "apiKeys": "API kulcsok",
+                "logout": "Kijelentkezés"
+            }
+        }
+    },
+    "apiKeys": {
+        "title": "Szükséges API kulcsok",
+        "description": "Az alkalmazás használatához a következő API kulcsok szükségesek. A kulcsok az eszköz helyi tárhelyén kerülnek tárolásra.",
+        "success": {
+            "saved": "Sikeresen mentve"
+        }
+    },
+    "alerts": {
+        "info": "Információ",
+        "note": "Megjegyzés",
+        "tip": "Tipp",
+        "important": "Fontos",
+        "warning": "Figyelmeztetés",
+        "caution": "Óvatosan",
+        "debug": "Hibakeresés",
+        "example": "Példa",
+        "success": "Sikeres",
+        "help": "Súgó",
+        "idea": "Ötlet",
+        "pending": "Folyamatban",
+        "security": "Biztonság",
+        "beta": "Béta",
+        "best-practice": "Legjobb gyakorlat"
+    },
+    "components": {
+        "MultiSelectInput": {
+            "placeholder": "Válasszon..."
+        }
+    }
+}

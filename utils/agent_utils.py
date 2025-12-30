@@ -9,6 +9,23 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).parent.parent))
 
 from utils.c64_hw import C64HardwareAccess
+from utils.bas2prg import Bas2Prg
+
+def get_message_content(content):
+    """
+    Extracts text content from a message which may contain text and other elements.
+    """
+    if len(content) == 0:
+        return
+    if isinstance(content, list):
+        message = content[0]
+    else:
+        message = content
+    if isinstance(message, str):
+        return message
+    elif isinstance(message, dict):
+        return message.get("text", "")
+    return str(message)   
 
 def encode_image(image_path):
     with open(image_path, "rb") as image_file:
@@ -35,13 +52,20 @@ def read_example_programs(num_examples: int = 5) -> str:
             examples.append(f.read())
     return "\n\n".join(examples)
 
-def convert_c64_bas_to_prg(bas_file_path: str) -> str:
-    # Execute the bas2prg.exe in the utilities folder to convert .bas to .prg
-    bas2prg_exe_path = os.path.join("utilities", "bas2prg.exe")
-    # How to call: bas2prg.exe -o guess_hun.prg guess_hun.bas
-    prg_file_path = bas_file_path.replace(".bas", ".prg")
-    subprocess.run([bas2prg_exe_path, "-o", prg_file_path, bas_file_path], check=True)
-    return prg_file_path
+def convert_c64_bas_to_prg(bas_file_path: str = None, bas_code: str = None, write_to_file: bool = True) -> str:
+    prg_file_path = None
+    converter = Bas2Prg()
+    if bas_code is not None:
+        prg_data = converter.convert(source_text=bas_code)
+    else:
+        prg_file_path = bas_file_path.replace(".bas", ".prg")
+        prg_data = converter.convert(source_text=open(bas_file_path, "r").read())
+
+    if write_to_file and bas_file_path is not None:
+        with open(prg_file_path, "wb") as prg_file:
+            prg_file.write(prg_data)
+
+    return prg_file_path, prg_data
 
 
 # if __name__ == "__main__":

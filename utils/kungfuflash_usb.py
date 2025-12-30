@@ -39,6 +39,10 @@ class KungFuFlashUSB:
                 raise RuntimeError("Could not find KungFuFlash device automatically. Please specify the port.")
         else:
             self.port = port
+            # Check if the specified port exists
+            available_ports = [p.device for p in serial.tools.list_ports.comports()]
+            if self.port not in available_ports:
+                raise RuntimeError(f"Specified port '{self.port}' not found among available ports: {available_ports}")
         self.baudrate = baudrate
         self.timeout = timeout
         self.serial: Optional[serial.Serial] = None
@@ -92,7 +96,7 @@ class KungFuFlashUSB:
         )
         
         # Small delay to let the connection stabilize
-        time.sleep(0.1)
+        time.sleep(1)
         
         # Flush any existing data
         self.serial.reset_input_buffer()
