@@ -19,7 +19,7 @@ LOAD_EXAMPLE_PROGRAMS = True
 
 
 class CodingTools:
-    def __init__(self, llm_access, cl):
+    def __init__(self, llm_access, cl = None):
         self.model_coder = llm_access.get_llm_model(create_new=True, streaming=False)
         self.llm_access = llm_access
         self.cl = cl
@@ -189,46 +189,54 @@ class CodingTools:
         })  
     
     async def _convert_code_to_prg(self, game_name: str, runtime: ToolRuntime[None, C64VibeAgentState]) -> str:
-        # Write the source code to a temporary BAS file
+
         source_code = runtime.state.get("current_source_code", "")
         current_timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
-        # temp_bas_path = os.path.join("output", f"{game_name}_{current_timestamp}.bas")
-        # with open(temp_bas_path, "w") as temp_bas_file:
-        #     temp_bas_file.write(source_code)
-        
-        # Convert the source code to a PRG file
-        temp_prg_path, prg_data = agent_utils.convert_c64_bas_to_prg(bas_code=source_code, write_to_file=False)
-        prg_base64 = base64.b64encode(prg_data).decode()
-        props = { "button_label": "🎮 Launch Game in Online C64 Emulator",
-                "target_origin": "http://ty64.krissz.hu",
-                "prg_binary_base64": prg_base64,}        
 
-        emulator_link = self.cl.CustomElement(name="EmulatorLink", props=props)
+        if self.cl is None:
+            temp_bas_path = os.path.join("output", f"{game_name}_{current_timestamp}.bas")
+            with open(temp_bas_path, "w") as temp_bas_file:
+                temp_bas_file.write(source_code)
 
-        elements = [
-            emulator_link,
-            self.cl.File(
-                name=f"{game_name}_{current_timestamp}.bas",
-                content=source_code,
-                display="inline",
-            ),
-            self.cl.File(
-                name=f"{game_name}_{current_timestamp}.prg",
-                content=prg_data,
-                display="inline",
-            )
-        ]
+            temp_prg_path, _ = agent_utils.convert_c64_bas_to_prg(bas_file_path=temp_bas_path, write_to_file=True)
 
-        step = self.cl.Step(name=f"ConvertGameToPRG", type="tool", elements=elements)
-        step.start = utc_now()
-        step.default_open = True
-        step.show_input = False
-        step.output = f"Converted source code to .PRG file for game '{game_name}'. Download the files below or directly launch the game in the online C64 emulator."
-        step.end = utc_now()
+            return f"The source code has been saved to {temp_bas_path} and converted to PRG file at {temp_prg_path}."
 
-        await step.send()   
-
-        if temp_prg_path is None:
-            return "The files have been created and are available for download or launch in the online C64 emulator."
         else:
-            return f"""The files have been created and are available for download or launch in the online C64 emulator. PRG file created at path: {temp_prg_path}"""
+
+            # Convert the source code to a PRG file
+            temp_prg_path, prg_data = agent_utils.convert_c64_bas_to_prg(bas_code=source_code, write_to_file=False)
+            prg_base64 = base64.b64encode(prg_data).decode()
+            props = { "button_label": "🎮 Launch Game in Online C64 Emulator",
+                    "target_origin": "http://ty64.krissz.hu",
+                    "prg_binary_base64": prg_base64,}        
+
+            emulator_link = self.cl.CustomElement(name="EmulatorLink", props=props)
+
+            elements = [
+                emulator_link,
+                self.cl.File(
+                    name=f"{game_name}_{current_timestamp}.bas",
+                    content=source_code,
+                    display="inline",
+                ),
+                self.cl.File(
+                    name=f"{game_name}_{current_timestamp}.prg",
+                    content=prg_data,
+                    display="inline",
+                )
+            ]
+
+            step = self.cl.Step(name=f"ConvertGameToPRG", type="tool", elements=elements)
+            step.start = utc_now()
+            step.default_open = True
+            step.show_input = False
+            step.output = f"Converted source code to .PRG file for game '{game_name}'. Download the files below or directly launch the game in the online C64 emulator."
+            step.end = utc_now()
+
+            await step.send()   
+
+            if temp_prg_path is None:
+                return "The files have been created and are available for download or launch in the online C64 emulator."
+            else:
+                return f"""The files have been created and are available for download or launch in the online C64 emulator. PRG file created at path: {temp_prg_path}"""

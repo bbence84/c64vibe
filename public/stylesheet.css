@@ -1,0 +1,25 @@
+body:after{
+  content: "beta";
+  position: fixed;
+  z-index: 1070;
+  width: 80px;
+  height: 25px;
+  background: red;
+  top: 7px;
+  left: -22px;
+  text-align: center;
+  font-size: 14px;
+  letter-spacing: 1px;
+  font-family: sans-serif;
+  text-transform: uppercase;
+  font-weight: bold;
+  color: white;
+  line-height: 27px;
+  -ms-transform:rotate(-45deg);
+  -webkit-transform:rotate(-45deg);
+  transform:rotate(-45deg);
+}
+#new-chat-button {
+margin-left:25px;
+  margin-top: 15px
+}

@@ -14,11 +14,11 @@
 # ✓ Convert to web based UI
 #   - Auto popup right away for setting LLM model and API key if not set
 #   - Ability to upload generated bas file with a screenshot for fixing
-#   - Support Hungarian language in the UI
+#   - Support Hungarian language in the UI: Chainlit and custom messages and UI texts
 #   - Conversation starters
 #   - Registration, persisting conversations?
 #   - Download also conversation summary for later upload
-#   - Instructions on getting an API key on OpenRouter
+#   ✓ Instructions on getting an API key on OpenRouter
 #   ✓ Settings for LLM provider and model selection and API keys 
 #   ✓ File download for converted created programs
 #   ✓ Proper formatting of tool outputs e.g. code blocks for source code: Write file only filename, ReadFile rename, Glob?
@@ -28,7 +28,7 @@
 #   ✓ Open generated game in an online C64 emulator directly from the UI
 # - Instruction to immediately start outputting a confirmation when the agent starts
 # - HIGH_PRIO Improve error handling and logging
-# - HIGH_PRIO Store API keys in local storage or session storage 
+# - Store API keys in local storage or session storage 
 # - Use structured tool outputs i.e. when generated code is returned
 # - Provide examples for fancy texts for games
 # - Human in the loop for approval before creating the source code
@@ -183,23 +183,25 @@ async def display_welcome_message(hw_access_tools):
         hardware_status.append("✓ Capture device connected")
     
     hardware_info = "\n".join(hardware_status) if hardware_status else "⚠ No hardware connected (emulation mode)"
+    register_llm_provider_text = ""
+    if cl.user_session.get("model_init_success") is not True:
+        register_llm_provider_text = f"""
+### Getting an AI Model Provider API Key
+In order to use this app, you need to register an AI model provider account through either OpenRouter or directly with the vendor. OpenRouter allows you to use multiple AI models from different providers with a single API key. 
+[Get an API key](https://openrouter.ai/settings/keys) after registration and [adding credits](https://openrouter.ai/settings/credits). You can also get API keys directly, i.e. in [Google AI Studio](https://aistudio.google.com/app/api-keys). There's free quota, but it's pretty limited, so you also need to enable billing. For best experience and cost efficiency, we recommend using the **Google Gemini 3.0 Flash Preview model**.
+"""
     
-    welcome_message = f"""# 🎮 C64Vibe - AI-Powered Commodore 64 Game Creator
+    welcome_message = f"""## 🎮 C64Vibe (BETA) - AI-Powered Commodore 64 Game Creator 
 
-Welcome to **C64Vibe**, your AI assistant for creating authentic Commodore 64 BASIC V2.0 games!
+Welcome to **C64Vibe**, your AI assistant for creating Commodore 64 BASIC V2.0 games!
 
 I can help you:
 - Design and create C64 BASIC V2.0 games
 - Check syntax and fix errors
-- Run programs on real hardware (if connected)
-- Capture and analyze C64 screen output
+- Run programs on real hardware (if connected) or in an emulator
 
-Check the readme (top right corner icon) for more details.
-
-**Hardware Status:**
-{hardware_info}
-
-What game would you like to create today?"""
+{register_llm_provider_text}
+"""
     global welcome_msg
     welcome_msg = await cl.Message(content=welcome_message).send()
 
@@ -316,19 +318,6 @@ async def on_message(message: cl.Message):
     agent = cl.user_session.get("agent")
     thread_id = cl.user_session.get("thread_id") 
 
-    # if message.elements:
-    #     print(message.elements)
-    #     attachments = [file for file in message.elements]
-    #     if len(attachments) > 0:  
-    #         uploaded_file = attachments[0]
-    #         # Check if file extensions is .bas or .BAS
-    #         if uploaded_file.name.lower().endswith(".bas"):
-    #             with open(uploaded_file.path, "r") as f:
-    #                 file_content = f.read()
-    #                 file_path = uploaded_file.path
-    #             await cl.Message(content=f"Uploaded C64 BASIC source code file: {uploaded_file.name}").send()
-
-
     agent_config = {"configurable": {"thread_id": thread_id}, "recursion_limit": 50}
 
     msg = cl.Message(content="")
@@ -343,30 +332,6 @@ async def on_message(message: cl.Message):
             token, metadata = data
             if isinstance(token, AIMessageChunk):
                 await msg.stream_token(token.text)
-
-    # Stream agent responses
-    # async for event in agent.astream_events(
-    #     config=agent_config,
-    #     input={"messages": [{"role": "user", "content": message.content}]},
-    #     version="v2"
-    # ):
-    #     if event["event"] == "on_chat_model_stream":
-    #         chunk = event.get("data", {}).get("chunk")
-    #         if chunk and hasattr(chunk, "content"):
-    #             await msg.stream_token(agent_utils.get_message_content(chunk.content))
-                # if len(chunk.content) == 0:
-                #     continue
-                # # Check if chunk.content is a list
-                # if isinstance(chunk.content, list):
-                #     last_message = chunk.content[-1]
-                # else:
-                #     last_message = chunk.content
-                # if last_message:
-                #     # Check if last_message is a str 
-                #     if isinstance(last_message, str):
-                #         await msg.stream_token(last_message)
-                #     elif isinstance(last_message, dict):
-                #         await msg.stream_token(last_message.get("text", ""))
 
     await msg.update()
 
