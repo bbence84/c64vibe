@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  c64vibe:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: c64vibe
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      - PORT=8000
+    volumes:
+      # Persist output files
+      - ./output:/app/output
+      # Persist uploaded files
+      - ./.files:/app/.files
+      # Persist Chainlit data
+      - ./.chainlit:/app/.chainlit
+    restart: unless-stopped
+    # Uncomment if you need hardware access (e.g., serial ports)
+    # devices:
+    #   - /dev/ttyUSB0:/dev/ttyUSB0
+    # privileged: true

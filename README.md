@@ -122,20 +122,14 @@ c64vibe/
 ├── resources/              # Resource files
 │   └── examples/           # Example C64 BASIC programs
 │       ├── adv.bas
-│       ├── invaders.bas
-│       ├── mindquiz.bas
-│       ├── quack.bas
-│       └── tankattack.bas
+│       └── gengszter.bas
 │
 ├── output/                 # Generated programs output directory
 │
-├── public/                 # Web interface assets
-│   ├── stylesheet.css      # Custom CSS styles
-│   ├── avatars/           # Chat avatars
-│   └── elements/          # Custom UI elements
-│       └── EmulatorLink.jsx  # Emulator launch component
-│
-└── tests/                  # Various misc test python files for debugging
+└── public/                 # Web interface assets
+    ├── avatars/           # Chat avatars
+    └── elements/          # Custom UI elements
+        └── EmulatorLink.jsx  # Emulator launch component
 ```
 
 ## 🔧 How It Works
