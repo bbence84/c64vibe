@@ -1,10 +1,11 @@
 __pycache__/
 .venv/
 .env
+tests/
 .production.env
 node_modules/
 .DS_Store
 output/
 .vscode/
 .files/
-vendor/
+tests/
