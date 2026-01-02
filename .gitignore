@@ -1,8 +1,10 @@
 __pycache__/
 .venv/
 .env
+.production.env
 node_modules/
 .DS_Store
 output/
 .vscode/
 .files/
+vendor/

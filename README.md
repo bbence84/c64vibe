@@ -20,7 +20,7 @@ C64Vibe is an AI agent specialized in creating games for the Commodore 64 comput
 
 ## 📋 Requirements
 
-- Python 3.8+
+- Python 3.12+
 - API key from one of the supported AI providers:
   - Google AI Studio
   - Anthropic
@@ -28,7 +28,7 @@ C64Vibe is an AI agent specialized in creating games for the Commodore 64 comput
   - OpenRouter (provides access to multiple models with one key)
 
 ### Optional Hardware
-- KungFu Flash USB device (for loading programs on real C64)
+- KungFu Flash USB device, with modified firmware (for loading programs on real C64)
 - USB keyboard interface for C64
 - Video capture device (for screen capture analysis)
 
@@ -54,22 +54,21 @@ Edit `.env` and add your AI provider credentials:
 ```
 AI_MODEL_PROVIDER=google_genai
 AI_MODEL_NAME=gemini-3-flash-preview
-GOOGLE_API_KEY=your_api_key_here
-
-# Optional: For OpenRouter
-OPENROUTER_API_KEY=your_openrouter_key_here
+API_KEY=your_api_key_here
 
 # Optional: For LangSmith tracing
 LANGCHAIN_TRACING_V2=false
 LANGCHAIN_API_KEY=your_langsmith_key_here
 ```
+Possible AI providers: anthropic, openai, azure_openai, google_genai, openrouter
+For OpenRouter, use the model name with the prefix as shown on the OpenRouter model page, i.e. google/gemini-3-flash-preview
 
 ## 🎯 Usage
 
 ### Web Interface (Recommended)
 
 ```bash
-chainlit run c64vibe_ui.py
+chainlit run main.py
 ```
 
 The web interface will open at `http://localhost:8000`. You can:
@@ -91,7 +90,7 @@ The CLI provides a terminal-based interface with rich formatting and markdown su
 ```
 c64vibe/
 │
-├── c64vibe_ui.py           # Main Chainlit web interface
+├── main.py           # Main Chainlit web interface
 ├── c64vibe_cli.py          # Command-line interface
 ├── chainlit.md             # Chainlit welcome message
 ├── requirements.txt        # Python dependencies
@@ -105,6 +104,7 @@ c64vibe/
 ├── tools/                  # Agent tools and state management
 │   ├── agent_state.py      # Agent state schema
 │   ├── coding_tools.py     # Code generation and syntax checking tools
+│   ├── game_design_tools.py    # Creates detailed design based on user request
 │   ├── testing_tools.py    # Testing and validation tools
 │   └── hw_access_tools.py  # Hardware interaction tools (C64, KungFu Flash)
 │
@@ -168,11 +168,13 @@ The `LLMAccessProvider` class provides a unified interface to multiple AI provid
 The agent has access to three main tool categories:
 
 ##### **Coding Tools** (`tools/coding_tools.py`)
-- **DesignGamePlan**: Creates detailed game design documents using LLM
 - **CreateUpdateC64BasicCode**: Generates or modifies C64 BASIC code based on design plans
 - **SyntaxChecker**: Validates code syntax using LLM or rule-based checking
 - **FixSyntaxErrors**: Automatically corrects syntax errors
 - **ConvertCodeToPRG**: Converts BASIC text to C64 PRG binary format
+
+##### **Games Design Tools** (`game_design_tools.py`)
+- **DesignGamePlan**: Creates detailed game design documents using LLM
 
 The code generation process:
 1. User provides game concept
@@ -184,16 +186,14 @@ The code generation process:
 7. Cycle repeats until code is error-free
 
 ##### **Testing Tools** (`tools/testing_tools.py`)
-- **CaptureC64Screen**: Captures C64 screen via video device
-- **AnalyzeC64Screen**: Uses vision-capable LLM to analyze screen content
-- **ValidateProgram**: Checks if program meets requirements
+- **CaptureC64Screen**: Captures C64 screen via video input device and compares the screen reading to an expected result
 
 ##### **Hardware Access Tools** (`tools/hw_access_tools.py`)
-- **RunC64Program**: Loads and executes programs on real C64 via KungFu Flash
+- **RunC64Program**: Loads and executes programs on real C64 via KungFu Flash, using a modified firmware
 - **RestartC64**: Resets the C64 hardware
 - **TypeOnC64**: Sends keyboard input to C64
 
-#### 4. Web Interface Flow (`c64vibe_ui.py`)
+#### 4. Web Interface Flow (`main.py`)
 
 The web interface starts by setting up the AI connection, checking if C64 hardware is connected, and displaying a welcome message. It then creates the agent with access to code generation tools, testing tools, and file management capabilities.
 
@@ -275,10 +275,7 @@ Multi-layered validation ensures code quality:
 
 The `resources/examples/` folder contains sample C64 BASIC programs:
 - **adv.bas**: Text adventure game
-- **invaders.bas**: Space Invaders clone
-- **mindquiz.bas**: Quiz game
-- **quack.bas**: Simple duck game
-- **tankattack.bas**: Tank battle game
+- **gengszter.bas**: A hungarian text based adventure game
 
 These examples are used by the LLM as few-shot examples for better syntax following and game design ideas.
 
@@ -348,9 +345,8 @@ MIT
 
 - Built with [LangChain](https://langchain.com) and [LangGraph](https://langchain-ai.github.io/langgraph/)
 - Web UI powered by [Chainlit](https://chainlit.io)
-- Hardware integration via KungFu Flash USB device
+- Hardware integration via KungFu Flash USB device (using a modified firmware)
 
 ---
 
 **Note**: This is a beta release. Some features may be experimental or incomplete. Hardware integration requires specific USB devices and is optional for using the emulator-based features.
-

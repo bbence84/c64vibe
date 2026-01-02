@@ -12,6 +12,7 @@ from langchain.tools import tool, ToolRuntime
 from typing import Annotated, Literal, NotRequired
 from langgraph.types import Command
 from langchain_core.messages import ToolMessage
+from langchain_core.output_parsers import PydanticOutputParser
 
 from chainlit.utils import utc_now
 
@@ -25,6 +26,16 @@ class CodingTools:
         self.cl = cl
 
     def tools(self):
+
+        @tool("StoreSourceInAgentMemory", description="Stores provided C64 BASIC V2.0 source code in the agent's external memory for further processing.")
+        def store_source_in_external_memory(
+            runtime: ToolRuntime[None, C64VibeAgentState],
+            source_code: Annotated[str, "C64 BASIC V2.0 source code to store in the agent's external memory."]
+            ) -> Command:
+            return Command(update={
+                "current_source_code": source_code,
+                "messages": [ToolMessage(content=f"Stored provided source code in the agent's external memory.", tool_call_id=runtime.tool_call_id)]
+            })
 
         @tool("SyntaxChecker", description="Checks the syntax of C64 BASIC V2.0 source code. The source code is taken from the agent's external memory. The syntax check results are stored back in the agent's external memory.")
         def check_syntax(runtime: ToolRuntime[None, C64VibeAgentState], 
@@ -56,7 +67,8 @@ class CodingTools:
             check_syntax,
             create_source_code,
             fix_syntax_errors,
-            convert_code_to_prg
+            convert_code_to_prg,
+            store_source_in_external_memory
         ]
 
 
@@ -69,15 +81,16 @@ class CodingTools:
             class SyntaxCheckResults(BaseModel):
                 has_syntax_errors: bool = Field(description="Indicates whether there are syntax errors in the source code")
                 syntax_errors: str = Field(description="List of syntax errors found in the source code, or an empty string if none were found")
-
+            
             syntax_check_instructions = f""" Check the following C64 BASIC V2.0 source code for syntax errors:
                 {source_code}
                 List any syntax errors found, or state that there are no syntax errors.
-                Provide only the list of syntax errors or confirmation of no errors as output.
+                Provide only the list of syntax errors and a boolean indicating if there are syntax errors.
                 Syntax errors should be described clearly with line numbers where applicable.
                 """
             structured_llm_call = self.model_coder.with_structured_output(SyntaxCheckResults)  
             llm_checker_response = structured_llm_call.invoke([{"role": "user", "content": syntax_check_instructions}])
+
             syntax_check_output = SyntaxCheckResults.model_validate(llm_checker_response)
             syntax_check_errors = syntax_check_output.syntax_errors if syntax_check_output.has_syntax_errors else "No syntax errors found."
             if not syntax_check_output.has_syntax_errors:

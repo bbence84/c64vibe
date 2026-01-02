@@ -124,7 +124,7 @@ alert_style = "classic"
 # custom_js_attributes = "async type = \"module\""
 
 # Custom login page image, relative to public directory or external URL
-# login_page_image = "/public/custom-background.jpg"
+login_page_image = "/public/square_logo.png"
 
 # Custom login page image filter (Tailwind internal filters, no dark/light variants)
 # login_page_image_filter = "brightness-50 grayscale"
@@ -148,12 +148,13 @@ default_avatar_file_url = ""
 # custom_build = "./public/build"
 
 # Specify optional one or more custom links in the header.
-# [[UI.header_links]]
-#     name = "Issues"
-#     display_name = "Report Issue"
-#     icon_url = "https://avatars.githubusercontent.com/u/128686189?s=200&v=4"
-#     url = "https://github.com/Chainlit/chainlit/issues"
-#     target = "_blank" (default)  # Optional: "_self", "_parent", "_top".
+[[UI.header_links]]
+    name = "Github"
+    display_name = ""
+    icon_url = "/public/github-mark.png"
+    url = "https://github.com/bbence84/c64vibe/"
+    target = "_blank"
+
 
 [meta]
 generated_by = "2.9.3"

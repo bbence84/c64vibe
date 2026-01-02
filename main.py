@@ -9,55 +9,11 @@
 # Created by Bence Blaske - 2026
 # -----------------------------------------------------------
 
-# TODO
-# -----------------------------
-# ✓ Convert to web based UI
-#   - Auto popup right away for setting LLM model and API key if not set
-#   - Ability to upload generated bas file with a screenshot for fixing
-#   - Support Hungarian language in the UI: Chainlit and custom messages and UI texts
-#   - Conversation starters
-#   - Registration, persisting conversations?
-#   - Download also conversation summary for later upload
-#   ✓ Instructions on getting an API key on OpenRouter
-#   ✓ Settings for LLM provider and model selection and API keys 
-#   ✓ File download for converted created programs
-#   ✓ Proper formatting of tool outputs e.g. code blocks for source code: Write file only filename, ReadFile rename, Glob?
-#   ✓ Prevent full source code to end up in the main message 
-#   ✓ Better welcome message with hardware status and readme.md for the UI
-#   ✓ Don't save the generated prg and bas files on the server, only offer for download
-#   ✓ Open generated game in an online C64 emulator directly from the UI
-# - Instruction to immediately start outputting a confirmation when the agent starts
-# - HIGH_PRIO Improve error handling and logging
-# - Store API keys in local storage or session storage 
-# - Use structured tool outputs i.e. when generated code is returned
-# - Provide examples for fancy texts for games
-# - Human in the loop for approval before creating the source code
-# - Check if thinking mode is better vs. non thinking mode for Gemini, check reasoning traces
-# - Test case generation and execution
-# - Fix file save https://github.com/langchain-ai/deepagents/pull/336
-# - Clean up for open-source release
-# - (PRO) Registration, persist conversations and allow loading previous sessions
-# - (PRO) Sprite and graphic asset generation tools using generative AI models and convert to C64 formats
-# - (PRO) Sound effect and music generation tools
-# ✓ Support OpenRouter
-# ✓ Extend CreateUpdateC64BasicCode tool to update existing code based on user feedback
-# ✓ Pass whole game design plan to the code writing tool instead of just short description
-# ✓ Implement C64 "hardware" functions (loading/running/stopping programs, sending text to screen, restarting)
-# ✓ Use LangChain states for passing source code and large tool inputs / outputs in the context
-# ✓ Find C64 game source codes for few shot learning
-# ✓ Use Kungfu Flash or similar for program loading/running/restart?
-# ✓ Camera input for screen capture
-# ✓ Create library for remote C64 keyboard input
-# ✓ LLM streaming response handling
-# ✓ Deep agent: use the todo middleware for better step-by-step execution control
-# ✓ Add LLM based syntax checking tool
-# ✓ Ability to specify LLM provider and model in .env
-# ✓ Check if C64 is connected, if not, fall back without hardware access  
-# ✓ LangSmith based tracing and monitoring for productive deployment
-
 import os
 import uuid
 import chainlit as cl
+from typing import Dict, Optional
+
 from chainlit.input_widget import Select, Switch, TextInput
 
 from langchain.agents import create_agent
@@ -75,6 +31,7 @@ import utils.agent_utils as agent_utils
 from tools.agent_state import C64VibeAgentState
 from tools.coding_tools import CodingTools
 from tools.testing_tools import TestingTools
+from tools.game_design_tools import GameDesignTools
 from tools.hw_access_tools import HWAccessTools
 
 from dotenv import load_dotenv
@@ -82,23 +39,24 @@ load_dotenv()
 
 set_model_settings_alert = '<span style="color:red">⚠️**Set your AI model and API key in the Settings panel (⚙️ icon in the chat input area below) before proceeding.**⚠️</span>'
 
+# @cl.oauth_callback
+# def oauth_callback(
+#   provider_id: str,
+#   token: str,
+#   raw_user_data: Dict[str, str],
+#   default_user: cl.User,
+# ) -> Optional[cl.User]:
+#   return default_user
+
 @cl.on_chat_start
 async def on_chat_start():
-    """
-    Initializes the C64Vibe agent when a chat session starts.
-    """
-
-    llm_access_provider = LLMAccessProvider()
-    cl.user_session.set("llm_access_provider", llm_access_provider)
-
-    hw_access_tools = HWAccessTools()
-    cl.user_session.set("hw_access_tools", hw_access_tools)
+    cl.user_session.set("llm_access_provider", LLMAccessProvider())
+    cl.user_session.set("hw_access_tools", HWAccessTools())
 
     load_ai_model_from_env()
 
     await init_settings()
-
-    await display_welcome_message(hw_access_tools)
+    await display_welcome_message()
 
     global set_model_settings_alert_msg
 
@@ -116,10 +74,10 @@ async def initialize_agent():
     # Initialize tool classes
     coding_tools = CodingTools(llm_access=llm_access_provider, cl=cl)
     testing_tools = TestingTools(llm_access=llm_access_provider, capture_device_connected=hw_access_tools.is_capture_device_connected())
-    
+    game_design_tools = GameDesignTools(llm_access=llm_access_provider)
+
     model_agent = llm_access_provider.get_llm_model()
 
-    # Build agent instructions dynamically based on hardware availability
     c64vibe_agent_instructions = f"""
     You are C64Vibe, an AI Agent specialized in creating games for the Commodore 64 computer.
     Use the various tools at your disposal to create, test, and run C64 BASIC V2.0 games.
@@ -146,7 +104,7 @@ async def initialize_agent():
     path_instructions = f"""Always use the path {program_path_relative} to list, load and save files, but only save if needed. Don't use drive letters or absolute paths that contain drive letters."""
 
     # Combine all tools
-    c64_agent_tools = coding_tools.tools() + testing_tools.tools() + hw_access_tools.tools()
+    c64_agent_tools = coding_tools.tools() + testing_tools.tools() + hw_access_tools.tools() + game_design_tools.tools()
 
     # Setup middleware with Chainlit tracer
     middleware = [
@@ -170,19 +128,20 @@ async def initialize_agent():
     cl.user_session.set("thread_id", str(uuid.uuid4()))
 
 
-async def display_welcome_message(hw_access_tools):
+async def display_welcome_message():
     """
     Displays the welcome message with hardware status information.
     """
+    hw_access_tools = cl.user_session.get("hw_access_tools")
     hardware_status = []
     if hw_access_tools.is_kungfuflash_connected():
-        hardware_status.append("✓ KungFu Flash connected")
+        hardware_status.append("- ✓ KungFu Flash connected - ready to run programs directly on real C64 hardware")
     if hw_access_tools.is_c64keyboard_connected():
-        hardware_status.append("✓ C64 Keyboard connected")
+        hardware_status.append("- ✓ C64 Keyboard connected - can send keypresses to real C64 hardware")
     if hw_access_tools.is_capture_device_connected():
-        hardware_status.append("✓ Capture device connected")
+        hardware_status.append("- ✓ Capture device connected - can capture screen from real C64 hardware")
     
-    hardware_info = "\n".join(hardware_status) if hardware_status else "⚠ No hardware connected (emulation mode)"
+    hardware_info = "\n".join(hardware_status) if hardware_status else "- No Commodore 64 hardware connected - you can still create and test programs in an emulator or download the programs and run them manually on real hardware."
     register_llm_provider_text = ""
     if cl.user_session.get("model_init_success") is not True:
         register_llm_provider_text = f"""
@@ -199,6 +158,8 @@ I can help you:
 - Design and create C64 BASIC V2.0 games
 - Check syntax and fix errors
 - Run programs on real hardware (if connected) or in an emulator
+### Hardware Status
+{hardware_info}
 
 {register_llm_provider_text}
 """
@@ -208,28 +169,22 @@ I can help you:
 def load_ai_model_from_env():
     model_provider = os.getenv("AI_MODEL_PROVIDER")
     model_name = os.getenv("AI_MODEL_NAME")     
-    openrouter_api_key = os.getenv("OPENROUTER_API_KEY")
+    api_key = os.getenv("API_KEY")
 
     if model_provider and model_name:
-        cl.user_session.set("llm_model", model_name)
-        cl.user_session.set("model_provider", model_provider)
-        cl.user_session.set("openrouter_api_key", openrouter_api_key)
-
         use_openrouter = False
-        if openrouter_api_key != "" and openrouter_api_key is not None:
+        if model_provider == "openrouter":
             use_openrouter = True
         
         llm_access_provider = cl.user_session.get("llm_access_provider")
         try:
-            llm_access_provider.set_llm_model(model_name_technical=model_name, model_provider=model_provider, use_openrouter=use_openrouter)
+            llm_access_provider.set_llm_model(model_name_technical=model_name, model_provider=model_provider, api_key=api_key, use_openrouter=use_openrouter)
         except Exception as e:
             print(f"Error setting LLM model from env: {e}")
             cl.user_session.set("model_init_success", False)
             return
-
         cl.user_session.set("llm_access_provider", llm_access_provider)
         cl.user_session.set("model_init_success", True)
-    
     else:
         cl.user_session.set("model_init_success", False)
 
@@ -240,7 +195,7 @@ async def init_settings():
             Select(
                 id="LLMSelector",
                 label="LLM Model",
-                values=["Google Gemini 3.0 Flash Preview", "Google Gemini 3.0 Pro","Anthropic Claude 4.5 Sonnet", "Anthropic Claude 4.5 Opus", "OpenAI GPT-5", "OpenAI GPT-5.2"],
+                values=["Google Gemini 3.0 Flash Preview", "Google Gemini 3.0 Pro"], #,"Anthropic Claude 4.5 Sonnet", "Anthropic Claude 4.5 Opus", "OpenAI GPT-5", "OpenAI GPT-5.2"],
                 initial_index=0,
             ),
             Switch(id="OpenRouter", label="Model access via OpenRouter", initial=False),
@@ -257,19 +212,80 @@ async def on_settings_update(settings):
     cl.user_session.set("settings", settings)
     await change_agent_settings(settings)
 
+@cl.on_message
+async def on_message(message: cl.Message):
+
+    global welcome_msg
+    await welcome_msg.remove()
+    global set_model_settings_alert_msg
+
+    if cl.user_session.get("model_init_success") is not True:
+        await message.remove()
+        if 'set_model_settings_alert_msg' in globals():
+            await set_model_settings_alert_msg.remove()
+        set_model_settings_alert_msg = await cl.Message(content=set_model_settings_alert).send()
+        return
+
+    agent = cl.user_session.get("agent")
+    thread_id = cl.user_session.get("thread_id") 
+
+    agent_config = {"configurable": {"thread_id": thread_id}, "recursion_limit": 50}
+
+    attachment_message = None
+    if message.elements:
+        attachments = [file for file in message.elements if
+                                "text/plain" in file.mime or 
+                                "image/png" in file.mime or 
+                                "image/jpg" in file.mime or
+                                "image/jpeg" in file.mime or
+                                "application/octet-stream" in file.mime]       
+        if len(attachments) > 0:  
+            uploaded_file = attachments[0]
+            if uploaded_file.mime.startswith("image/"):
+                file_type = "image"
+            else:
+                file_type = "text"
+
+            if file_type == "image":
+                attachment_message = agent_utils.get_message_for_image(uploaded_file.path)
+            else:
+                try:
+                    with open(uploaded_file.path, "r", encoding="utf-8") as f:
+                        file_content = f.read()
+                        file_is_binary = False
+                except Exception as e:
+                    file_is_binary = True
+                if not file_is_binary:
+                    attachment_message = { "type": "text", "text": file_content }
+                else:
+                    attachment_message = None
+
+    if attachment_message:
+        agent_messages = [{"role": "user", "content": [{"type": "text", "text": message.content}, attachment_message]}] 
+    else:
+        agent_messages = [{"role": "user", "content": message.content}]           
+
+
+
+    msg = cl.Message(content="")
+    await msg.send()
+
+    async for stream_mode, data  in agent.astream(
+         config=agent_config,
+         stream_mode=["messages", "updates"],  
+         input={"messages": agent_messages},
+    ):
+        if stream_mode == "messages":
+            token, metadata = data
+            if isinstance(token, AIMessageChunk):
+                await msg.stream_token(token.text)
+
+    await msg.update()
+
 async def change_agent_settings(settings):
-    # Condition for LLMModel
     llm_model = settings["LLMSelector"]
     api_key = settings["APIKey"]
     use_openrouter = settings["OpenRouter"]
-
-    cl.user_session.set("llm_model", llm_model)
-    cl.user_session.set("api_key", api_key)
-    cl.user_session.set("use_openrouter", use_openrouter)
-
-    print(f"Selected LLM Model: {llm_model}")
-    print(f"API Key: {api_key}")
-    print(f"Use OpenRouter: {use_openrouter}")
 
     llm_access_provider = cl.user_session.get("llm_access_provider")
 
@@ -296,44 +312,7 @@ async def change_agent_settings(settings):
         
         if 'set_model_settings_alert_msg' in globals():
             await set_model_settings_alert_msg.remove()
-            set_model_settings_alert_msg = None
-
-@cl.on_message
-async def on_message(message: cl.Message):
-    """
-    Handles incoming user messages and streams agent responses.
-    """
-
-    global welcome_msg
-    await welcome_msg.remove()
-    global set_model_settings_alert_msg
-
-    if cl.user_session.get("model_init_success") is not True:
-        await message.remove()
-        if 'set_model_settings_alert_msg' in globals():
-            await set_model_settings_alert_msg.remove()
-        set_model_settings_alert_msg = await cl.Message(content=set_model_settings_alert).send()
-        return
-
-    agent = cl.user_session.get("agent")
-    thread_id = cl.user_session.get("thread_id") 
-
-    agent_config = {"configurable": {"thread_id": thread_id}, "recursion_limit": 50}
-
-    msg = cl.Message(content="")
-    await msg.send()
-
-    async for stream_mode, data  in agent.astream(
-         config=agent_config,
-         stream_mode=["messages", "updates"],  
-         input={"messages": [{"role": "user", "content": message.content}]},
-    ):
-        if stream_mode == "messages":
-            token, metadata = data
-            if isinstance(token, AIMessageChunk):
-                await msg.stream_token(token.text)
-
-    await msg.update()
+            set_model_settings_alert_msg = None    
 
 # Run Chainlit if this script is executed directly
 if __name__ == "__main__":

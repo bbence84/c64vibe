@@ -86,11 +86,11 @@ class HWAccessTools:
             temp_bas_file.write(source_code)
         
         # Convert the source code to a PRG file
-        temp_prg_path = agent_utils.convert_c64_bas_to_prg(temp_bas_path)
+        temp_prg_path, _ = agent_utils.convert_c64_bas_to_prg(bas_file_path=temp_bas_path, write_to_file=True)
 
         with self.kungfuflash as kff:
             kff.return_to_menu(reconnect=True)
-            time.sleep(5)  # Wait for menu to load
+            time.sleep(3)  # Wait for menu to load
             # print(f"Connected to KungFuFlash on {kff.get_port()}")
             # print(f"Sending {temp_prg_path} program via USB...")
             success = kff.send_prg(temp_prg_path)

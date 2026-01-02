@@ -92,7 +92,7 @@ class ChainlitMiddlewareTracer(AgentMiddleware if AgentMiddleware != object else
                     tool_formatted_output = f"```basic\n{tool_formatted_output}\n```"
                 step.output = tool_formatted_output
             except Exception as e:
-                print(f"Error formatting tool output for Chainlit: {e}")
+                print(f"Error formatting tool output for Chainlit: {e}, tool_name: {tool_name}, result: {result}")
                 step.output = str(result)
 
             step.end = utc_now()
@@ -127,7 +127,7 @@ class ChainlitMiddlewareTracer(AgentMiddleware if AgentMiddleware != object else
             case "WriteTodos":
                 tool_command = cast(Command, tool_output)
                 return self._format_todos(tool_command.update.get("todos", [])), "markdown"
-            case "CreateUpdateC64BasicCode":
+            case "CreateUpdateC64BasicCode" | "StoreSourceInAgentMemory":
                 tool_command = cast(Command, tool_output)
                 return tool_command.update.get("current_source_code", ""), "basic"
             case "SyntaxChecker":
@@ -136,6 +136,8 @@ class ChainlitMiddlewareTracer(AgentMiddleware if AgentMiddleware != object else
             case "FixSyntaxErrors":
                 tool_command = cast(Command, tool_output)
                 return tool_command.update.get("current_source_code", ""), "basic"
+            case "RunC64Program":
+                return tool_output.content, "markdown"
             # case "WriteFile":
             #     tool_command = cast(Command, tool_output)
             #     return f"File '{tool_command.update.get('filename', '')}' written successfully.", None
@@ -163,8 +165,12 @@ class ChainlitMiddlewareTracer(AgentMiddleware if AgentMiddleware != object else
                     return change_instructions, "text", True
                 else:
                     return game_design_description, "text", True
+            case "RunC64Program":
+                return "", "text", False
             case "DesignGamePlan":
                 return tool_input.get("description", ""), "text", True
+            case "StoreSourceInAgentMemory":
+                return "", "text", False
             case "SyntaxChecker" | "WriteTodos":
                 return "", "text", False
             case "FixSyntaxErrors":

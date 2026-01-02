@@ -108,7 +108,7 @@ class KungFuFlashUSB:
             self.serial.close()
             self.serial = None
             
-    def _send_handshake(self, command: str, max_retries: int = 4) -> bool:
+    def _send_handshake(self, command: str, max_retries: int = 3) -> bool:
         """
         Send a handshake command and wait for response.
         
@@ -177,7 +177,7 @@ class KungFuFlashUSB:
                     time.sleep(0.5)
                     continue
                     
-            except (serial.SerialTimeoutException, UnicodeDecodeError) as e:
+            except (serial.SerialTimeoutException, UnicodeDecodeError, serial.SerialException) as e:
                 print(f"Handshake attempt {attempt + 1} failed: {e}")
                 time.sleep(0.5)
                 continue
@@ -223,55 +223,61 @@ class KungFuFlashUSB:
         # Send handshake
         if verbose:
             print("Sending handshake: EFSTART:PRG")
-            
-        if not self._send_handshake("PRG"):
-            print("Handshake failed")
-            return False
-            
-        if verbose:
-            print("Sending PRG file...")
-            
-        # Read how many bytes the device wants
-        chunk_size_bytes = self.serial.read(2)
-        if len(chunk_size_bytes) != 2:
-            print("Error: Could not read chunk size")
-            return False
-            
-        chunk_size = struct.unpack('<H', chunk_size_bytes)[0]
         
-        total_sent = 0
-        offset = 0
-        
-        while offset < len(prg_data):
-            # Determine how many bytes to send in this chunk
-            remaining = len(prg_data) - offset
-            send_size = min(remaining, chunk_size)
+        try:
             
-            chunk = prg_data[offset:offset + send_size]
-            
-            # Send chunk size (little-endian 16-bit)
-            size_bytes = struct.pack('<H', len(chunk))
-            if self.serial.write(size_bytes) != 2:
-                print("\nError: Failed to send chunk size")
+            if not self._send_handshake("PRG"):
+                print("Handshake failed")
                 return False
                 
-            # Send chunk data
-            if self.serial.write(chunk) != len(chunk):
-                print("\nError: Failed to send chunk data")
-                return False
-                
-            total_sent += len(chunk)
-            offset += len(chunk)
-            
             if verbose:
-                print(f"\rBytes sent: {total_sent:6d}", end='', flush=True)
+                print("Sending PRG file...")
                 
-            # If we sent less than chunk_size, we're done
-            if len(chunk) < chunk_size:
-                break
+            # Read how many bytes the device wants
+            chunk_size_bytes = self.serial.read(2)
+            if len(chunk_size_bytes) != 2:
+                print("Error: Could not read chunk size")
+                return False
                 
-        if verbose:
-            print("\n\nDONE!")
+            chunk_size = struct.unpack('<H', chunk_size_bytes)[0]
+            
+            total_sent = 0
+            offset = 0
+            
+            while offset < len(prg_data):
+                # Determine how many bytes to send in this chunk
+                remaining = len(prg_data) - offset
+                send_size = min(remaining, chunk_size)
+                
+                chunk = prg_data[offset:offset + send_size]
+                
+                # Send chunk size (little-endian 16-bit)
+                size_bytes = struct.pack('<H', len(chunk))
+                if self.serial.write(size_bytes) != 2:
+                    print("\nError: Failed to send chunk size")
+                    return False
+                    
+                # Send chunk data
+                if self.serial.write(chunk) != len(chunk):
+                    print("\nError: Failed to send chunk data")
+                    return False
+                    
+                total_sent += len(chunk)
+                offset += len(chunk)
+                
+                if verbose:
+                    print(f"\rBytes sent: {total_sent:6d}", end='', flush=True)
+                    
+                # If we sent less than chunk_size, we're done
+                if len(chunk) < chunk_size:
+                    break
+                    
+            if verbose:
+                print("\n\nDONE!")
+
+        except (serial.SerialException, BaseException) as e:
+            print(f"Serial error during PRG send: {e}")
+            return False
             
         return True
         
@@ -306,9 +312,6 @@ class KungFuFlashUSB:
         # Format: "efstart:" (8 bytes) + "mnu" (3 bytes) + "\x00" (1 byte) = 12 bytes
         # Note: Using "mnu" instead of "menu" to fit the 12-byte protocol limit
         command = b"efstart:mnu\x00"
-        
-        if len(command) != 12:
-            raise RuntimeError(f"Menu command must be exactly 12 bytes, got {len(command)}")
             
         self.serial.write(command)
         self.serial.flush()

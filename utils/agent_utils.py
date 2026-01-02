@@ -1,6 +1,6 @@
 import base64
 import os
-import cv2
+#import cv2
 import time
 import subprocess
 
@@ -8,8 +8,15 @@ import sys
 from pathlib import Path
 sys.path.append(str(Path(__file__).parent.parent))
 
-from utils.c64_hw import C64HardwareAccess
 from utils.bas2prg import Bas2Prg
+
+def get_message_for_image(image_path):
+    with open(image_path, "rb") as image_file:
+        file_buffer = image_file.read()
+        b64 = base64.b64encode(file_buffer).decode()
+        img_base64 = f"data:image/png;base64,{b64}"  
+        img_message = { "type": "image_url", "image_url": { "url": img_base64, },}
+    return img_message
 
 def get_message_content(content):
     """
@@ -32,15 +39,16 @@ def encode_image(image_path):
         return base64.b64encode(image_file.read()).decode('utf-8')
 
 def get_webcam_snapshot():
-    file_name = ('output/webcam_snapshot.png')
-    camera = cv2.VideoCapture(1 + cv2.CAP_DSHOW)  
-    #camera = cv2.VideoCapture(0)  
-    camera.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
-    camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 960)
-    return_value, image = camera.read()
-    cv2.imwrite(file_name, image)
-    del(camera)
-    return file_name
+    return None
+    # file_name = ('output/webcam_snapshot.png')
+    # camera = cv2.VideoCapture(1 + cv2.CAP_DSHOW)  
+    # #camera = cv2.VideoCapture(0)  
+    # camera.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+    # camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 960)
+    # return_value, image = camera.read()
+    # cv2.imwrite(file_name, image)
+    # del(camera)
+    # return file_name
 
 def read_example_programs(num_examples: int = 5) -> str:
     examples = []

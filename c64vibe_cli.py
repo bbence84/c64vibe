@@ -19,11 +19,13 @@ from langchain.agents import create_agent
 from langchain.agents.middleware import HumanInTheLoopMiddleware, InterruptOnConfig, TodoListMiddleware
 from deepagents.middleware.filesystem import FilesystemMiddleware
 
+
 from utils.formatting import format_messages, format_message
 
 from tools.agent_state import C64VibeAgentState
 from tools.coding_tools import CodingTools
 from tools.testing_tools import TestingTools
+from tools.game_design_tools import GameDesignTools
 from tools.hw_access_tools import HWAccessTools
 
 from rich.prompt import Prompt
@@ -60,6 +62,7 @@ model_screen_ocr = llm_access_provider.get_llm_model()
 coding_tools = CodingTools(llm_access=llm_access_provider)
 testing_tools = TestingTools(llm_access=llm_access_provider, capture_device_connected=False)
 hw_access_tools = HWAccessTools()
+game_design_tools = GameDesignTools(llm_access=llm_access_provider)
 
 c64vibe_agent_instructions = f"""
     You are C64Vibe, an AI Agent specialized in creating games for the Commodore 64 computer.
@@ -85,7 +88,7 @@ program_path = os.path.abspath(f"output")
 program_path_relative=program_path[3:] if program_path[1] == ':' else program_path
 path_instructions = f"""Always use the path {program_path_relative} to list, load and save files. Don't use drive letters or absolute paths that contain drive letters."""
 
-c64_agent_tools = coding_tools.tools() + testing_tools.tools() + hw_access_tools.tools()
+c64_agent_tools = coding_tools.tools() + testing_tools.tools() + hw_access_tools.tools() + game_design_tools.tools()
 
 deepagent_middleware = [TodoListMiddleware(), FilesystemMiddleware(backend=FilesystemBackend())]
 
