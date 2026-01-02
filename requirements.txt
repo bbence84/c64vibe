@@ -3,6 +3,7 @@ pydantic==2.12.4
 langchain==1.2.0
 langchain-core==1.2.5
 langchain-google-vertexai
+langchain-google-genai
 langchain-text-splitters
 langchain-community
 langchain-mcp-adapters

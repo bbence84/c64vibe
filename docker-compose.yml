@@ -7,11 +7,11 @@ services:
       dockerfile: Dockerfile
     container_name: c64vibe
     ports:
-      - "8000:8000"
+      - "8030:8030"
     env_file:
       - .env
     environment:
-      - PORT=8000
+      - PORT=8030
     volumes:
       # Persist output files
       - ./output:/app/output
