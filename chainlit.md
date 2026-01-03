@@ -1,4 +1,4 @@
-# 🎮 VibeC64 - AI-Powered Commodore 64 Game Creator
+# VibeC64 - AI-Powered Commodore 64 Game Creator
 
 Welcome to **VibeC64**, your AI assistant for creating Commodore 64 BASIC V2.0 games!
 

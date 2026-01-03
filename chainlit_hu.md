@@ -1,4 +1,4 @@
-# 🎮 VibeC64 - MI alapú Commodore 64 játékfejlesztés
+# VibeC64 - MI alapú Commodore 64 játékfejlesztés
 
 Üdvözöl a **VibeC64**, az AI-asszisztensed Commodore 64 BASIC V2.0 játékok készítéséhez!
 
