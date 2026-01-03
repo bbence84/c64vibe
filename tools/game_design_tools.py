@@ -2,7 +2,7 @@ from langchain.tools import tool, ToolRuntime
 from typing import Annotated, Literal, NotRequired
 import utils.agent_utils as agent_utils
 
-from tools.agent_state import C64VibeAgentState
+from tools.agent_state import VibeC64AgentState
 
 class GameDesignTools:
     def __init__(self, llm_access, capture_device_connected=False):

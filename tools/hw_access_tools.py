@@ -6,7 +6,7 @@ from typing_extensions import runtime
 from utils.c64_hw import C64HardwareAccess
 from utils.kungfuflash_usb import KungFuFlashUSB
 import utils.agent_utils as agent_utils
-from tools.agent_state import C64VibeAgentState
+from tools.agent_state import VibeC64AgentState
 from langchain.tools import tool, ToolRuntime
 
 logger = logging.getLogger(__name__)
@@ -53,11 +53,11 @@ class HWAccessTools:
     def tools(self):
 
         @tool("RunC64Program", description="Loads and runs the C64 BASIC V2.0 program from the agent's external memory on the connected Commodore 64 hardware")
-        def run_c64_program(runtime: ToolRuntime[None, C64VibeAgentState]) -> str:
+        def run_c64_program(runtime: ToolRuntime[None, VibeC64AgentState]) -> str:
             return self._run_c64_program(runtime)
         
         @tool("RestartC64", description="Restarts the connected Commodore 64 hardware")
-        def restart_c64(runtime: ToolRuntime[None, C64VibeAgentState]) -> str:
+        def restart_c64(runtime: ToolRuntime[None, VibeC64AgentState]) -> str:
             return self._restart_c64()
         
         tools = []
@@ -70,7 +70,7 @@ class HWAccessTools:
             
         return tools
     
-    # def _download_c64_program(self, game_name: str, runtime: ToolRuntime[None, C64VibeAgentState]) -> str:
+    # def _download_c64_program(self, game_name: str, runtime: ToolRuntime[None, VibeC64AgentState]) -> str:
     #     # Write the source code to a temporary BAS file
     #     source_code = runtime.state.get("current_source_code", "")
     #     temp_bas_path = os.path.join("output", f"{game_name}.bas")
@@ -82,7 +82,7 @@ class HWAccessTools:
     #     return temp_prg_path, temp_bas_file
     
     
-    def _run_c64_program(self, runtime: ToolRuntime[None, C64VibeAgentState]) -> str:
+    def _run_c64_program(self, runtime: ToolRuntime[None, VibeC64AgentState]) -> str:
 
         source_code = runtime.state.get("current_source_code", "")
 

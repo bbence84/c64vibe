@@ -87,9 +87,9 @@ reaction_on_message_received = false
 
 [UI]
 # Name of the assistant.
-name = "C64Vibe"
+name = "VibeC64"
 
-github="https://github.com/bbence84/c64vibe/"
+github="https://github.com/bbence84/VibeC64/"
 
 default_theme = "light"
 
@@ -153,7 +153,7 @@ default_avatar_file_url = ""
     name = "Github"
     display_name = ""
     icon_url = "/public/github-mark.png"
-    url = "https://github.com/bbence84/c64vibe/"
+    url = "https://github.com/bbence84/VibeC64/"
     target = "_blank"
 
 

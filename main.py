@@ -1,11 +1,13 @@
-#  ██████╗ ██████╗ ██╗  ██╗    ██╗   ██╗██╗██████╗ ███████╗
-# ██╔════╝██╔════╝ ██║  ██║    ██║   ██║██║██╔══██╗██╔════╝
-# ██║     ███████╗ ███████║    ██║   ██║██║██████╔╝█████╗  
-# ██║     ██╔═══██╗╚════██║    ╚██╗ ██╔╝██║██╔══██╗██╔══╝  
-# ╚██████╗╚██████╔╝     ██║     ╚████╔╝ ██║██████╔╝███████╗
-#  ╚═════╝ ╚═════╝      ╚═╝      ╚═══╝  ╚═╝╚═════╝ ╚══════╝
+#  █████   █████  ███  █████                █████████   ████████  █████ █████ 
+# ░░███   ░░███  ░░░  ░░███                ███░░░░░███ ███░░░░███░░███ ░░███  
+#  ░███    ░███  ████  ░███████   ██████  ███     ░░░ ░███   ░░░  ░███  ░███ █
+#  ░███    ░███ ░░███  ░███░░███ ███░░███░███         ░█████████  ░███████████
+#  ░░███   ███   ░███  ░███ ░███░███████ ░███         ░███░░░░███ ░░░░░░░███░█
+#   ░░░█████░    ░███  ░███ ░███░███░░░  ░░███     ███░███   ░███       ░███░ 
+#     ░░███      █████ ████████ ░░██████  ░░█████████ ░░████████        █████ 
+#      ░░░      ░░░░░ ░░░░░░░░   ░░░░░░    ░░░░░░░░░   ░░░░░░░░        ░░░░░                                                                    
 # -----------------------------------------------------------
-# C64Vibe UI: Chainlit Web Interface for C64 Program Creation
+# VibeC64: Chat UI for AI Assisted C64 Game Creation
 # Created by Bence Blaske - 2026
 # -----------------------------------------------------------
 
@@ -33,7 +35,7 @@ from langchain.messages import AIMessage, AIMessageChunk, AnyMessage, ToolMessag
 from utils.llm_access import LLMAccessProvider
 from utils.chainlit_middleware import ChainlitMiddlewareTracer
 
-from tools.agent_state import C64VibeAgentState
+from tools.agent_state import VibeC64AgentState
 from tools.coding_tools import CodingTools
 from tools.testing_tools import TestingTools
 from tools.game_design_tools import GameDesignTools
@@ -84,8 +86,8 @@ async def initialize_agent():
 
     model_agent = llm_access_provider.get_llm_model()
 
-    c64vibe_agent_instructions = f"""
-    You are C64Vibe, an AI Agent specialized in creating games for the Commodore 64 computer.
+    vibec64_agent_instructions = f"""
+    You are VibeC64, an AI Agent specialized in creating games for the Commodore 64 computer.
     Use the various tools at your disposal to create, test, and run C64 BASIC V2.0 games.
     When given a user request, first determine if it involves creating or modifying a C64 BASIC V2.0 game.
 
@@ -130,8 +132,8 @@ async def initialize_agent():
         tools=c64_agent_tools,
         middleware=middleware,
         checkpointer=MemorySaver(),
-        state_schema=C64VibeAgentState,
-        system_prompt=c64vibe_agent_instructions + path_instructions,
+        state_schema=VibeC64AgentState,
+        system_prompt=vibec64_agent_instructions + path_instructions,
     ).with_config({"recursion_limit": 50})
     
     # Store agent in session
@@ -160,9 +162,9 @@ In order to use this app, you need to register an AI model provider account thro
 [Get an API key](https://openrouter.ai/settings/keys) after registration and [adding credits](https://openrouter.ai/settings/credits). You can also get API keys directly, i.e. in [Google AI Studio](https://aistudio.google.com/app/api-keys). There's free quota, but it's pretty limited, so you also need to enable billing. For best experience and cost efficiency, we recommend using the **Google Gemini 3.0 Flash Preview model**.
 """
     
-    welcome_message = f"""## 🎮 C64Vibe (BETA) - AI-Powered Commodore 64 Game Creator 
+    welcome_message = f"""## VibeC64 (BETA) - AI-Powered Commodore 64 Game Creator 
 
-Welcome to **C64Vibe**, your AI assistant for creating Commodore 64 BASIC V2.0 games!
+Welcome to **VibeC64**, your AI assistant for creating Commodore 64 BASIC V2.0 games!
 
 I can help you:
 - Design and create C64 BASIC V2.0 games

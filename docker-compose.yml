@@ -1,11 +1,11 @@
 version: '3.8'
 
 services:
-  c64vibe:
+  vibec64:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: c64vibe
+    container_name: vibec64
     ports:
       - "8030:8030"
     env_file:

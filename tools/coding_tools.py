@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field
 import utils.agent_utils as agent_utils
 import utils.c64_syntax_checker as c64_syntax_checker
 
-from tools.agent_state import C64VibeAgentState
+from tools.agent_state import VibeC64AgentState
 
 from langchain.tools import tool, ToolRuntime
 from typing import Annotated, Literal, NotRequired
@@ -26,7 +26,7 @@ class CodingTools:
 
         @tool("StoreSourceInAgentMemory", description="Stores provided C64 BASIC V2.0 source code in the agent's external memory for further processing.")
         def store_source_in_external_memory(
-            runtime: ToolRuntime[None, C64VibeAgentState],
+            runtime: ToolRuntime[None, VibeC64AgentState],
             source_code: Annotated[str, "C64 BASIC V2.0 source code to store in the agent's external memory."]
             ) -> Command:
             return Command(update={
@@ -35,13 +35,13 @@ class CodingTools:
             })
 
         @tool("SyntaxChecker", description="Checks the syntax of C64 BASIC V2.0 source code. The source code is taken from the agent's external memory. The syntax check results are stored back in the agent's external memory.")
-        def check_syntax(runtime: ToolRuntime[None, C64VibeAgentState], 
+        def check_syntax(runtime: ToolRuntime[None, VibeC64AgentState], 
                           llm_based: Annotated[bool, "The syntax check is performed by an LLM"] = True) -> str:
             return self._check_syntax(runtime, llm_based)
                 
         @tool("CreateUpdateC64BasicCode", description="Generates or updates C64 BASIC V2.0 source code based on the FULL game design description or change instructions and persists it in the agent's external memory")
         def create_source_code(
-            runtime: ToolRuntime[None, C64VibeAgentState],
+            runtime: ToolRuntime[None, VibeC64AgentState],
             game_design_description: Annotated[str, "Game design description of the program to create, including the FULL game design. Do not include code in the description, only the FULL design plan created earlier, containing all details."],
             change_instructions: Annotated[str, "Optional instructions to modify existing code. If provided, modify the existing code instead of creating new code."] = "",
             ) -> Command:
@@ -49,7 +49,7 @@ class CodingTools:
 
         @tool("FixSyntaxErrors", description="Fixes syntax errors in C64 BASIC V2.0 source code stored in the agent's external memory or based on user-reported errors")
         def fix_syntax_errors(
-                runtime: ToolRuntime[None, C64VibeAgentState],
+                runtime: ToolRuntime[None, VibeC64AgentState],
                 user_reported_errors: Annotated[str, "Optional additional information about the syntax errors reported by the user."] = "",
                 ) -> Command:
             return self._fix_syntax_errors(runtime, user_reported_errors)
@@ -57,7 +57,7 @@ class CodingTools:
         @tool("ConvertCodeToPRG", description="Converts the C64 BASIC V2.0 source code stored in the agent's external memory to a .PRG file and offers the file for download or launching in an online C64 emulator.")
         async def convert_code_to_prg(
                 game_name: Annotated[str, "Name of the game, used for naming the output .PRG file."],
-                runtime: ToolRuntime[None, C64VibeAgentState]) -> str:
+                runtime: ToolRuntime[None, VibeC64AgentState]) -> str:
             return await self._convert_code_to_prg(game_name, runtime)
 
         return [
@@ -70,7 +70,7 @@ class CodingTools:
 
 
 
-    def _check_syntax(self, runtime: ToolRuntime[None, C64VibeAgentState],
+    def _check_syntax(self, runtime: ToolRuntime[None, VibeC64AgentState],
                     llm_based: Annotated[bool, "The syntax check is performed by an LLM"] = True) -> str:
         source_code = runtime.state.get("current_source_code", "")
 
@@ -105,7 +105,7 @@ class CodingTools:
 
 
     def _create_source_code(self,
-        runtime: ToolRuntime[None, C64VibeAgentState],
+        runtime: ToolRuntime[None, VibeC64AgentState],
         game_design_description: Annotated[str, "Game design description of the program to create, including the FULL game design. Do not include code in the description, only the FULL design plan created earlier, containing all details."],
         change_instructions: Annotated[str, "Optional instructions to modify existing code. If provided, modify the existing code instead of creating new code."] = "",
         ) -> Command:
@@ -176,7 +176,7 @@ class CodingTools:
         })    
 
     def _fix_syntax_errors(self,
-            runtime: ToolRuntime[None, C64VibeAgentState],
+            runtime: ToolRuntime[None, VibeC64AgentState],
             user_reported_errors: Annotated[str, "Optional additional information about the syntax errors reported by the user."] = "",
             ) -> Command:
         source_code = runtime.state.get("current_source_code", "")
@@ -198,7 +198,7 @@ class CodingTools:
             "messages": [ToolMessage(content=f"Fixed syntax errors and updated source code in the agent's external memory.", tool_call_id=runtime.tool_call_id)]
         })  
     
-    async def _convert_code_to_prg(self, game_name: str, runtime: ToolRuntime[None, C64VibeAgentState]) -> str:
+    async def _convert_code_to_prg(self, game_name: str, runtime: ToolRuntime[None, VibeC64AgentState]) -> str:
 
         source_code = runtime.state.get("current_source_code", "")
         current_timestamp = datetime.now().strftime("%Y%m%d%H%M%S")

@@ -1,6 +1,6 @@
-# 🎮 C64Vibe - AI-Powered Commodore 64 Game Creator
+# 🎮 VibeC64 - AI-Powered Commodore 64 Game Creator
 
-C64Vibe is an AI agent specialized in creating games for the Commodore 64 computer using BASIC V2.0. It leverages modern AI models to design, code, test, and optionally run C64 programs on real hardware or emulators.
+VibeC64 is an AI agent specialized in creating games for the Commodore 64 computer using BASIC V2.0. It leverages modern AI models to design, code, test, and optionally run C64 programs on real hardware or emulators.
 
 **Created by Bence Blaske - 2025**
 
@@ -37,7 +37,7 @@ C64Vibe is an AI agent specialized in creating games for the Commodore 64 comput
 1. Clone the repository:
 ```bash
 git clone <repository-url>
-cd c64vibe
+cd VibeC64
 ```
 
 2. Install dependencies:
@@ -80,7 +80,7 @@ The web interface will open at `http://localhost:8000`. You can:
 ### Command Line Interface
 
 ```bash
-python c64vibe_cli.py
+python vibec64_cli.py
 ```
 
 The CLI provides a terminal-based interface with rich formatting and markdown support.
@@ -88,10 +88,10 @@ The CLI provides a terminal-based interface with rich formatting and markdown su
 ## 📁 Folder Structure
 
 ```
-c64vibe/
+VibeC64/
 │
 ├── main.py           # Main Chainlit web interface
-├── c64vibe_cli.py          # Command-line interface
+├── vibec46_cli.py          # Command-line interface
 ├── chainlit.md             # Chainlit welcome message
 ├── requirements.txt        # Python dependencies
 ├── env_template            # Environment variables template
@@ -136,7 +136,7 @@ c64vibe/
 
 ### Architecture Overview
 
-C64Vibe is built on the **LangChain** framework for agent orchestration. The web interface uses **Chainlit** for a modern, interactive chat experience.
+VibeC64 is built on the **LangChain** framework for agent orchestration. The web interface uses **Chainlit** for a modern, interactive chat experience.
 
 ### Core Components
 

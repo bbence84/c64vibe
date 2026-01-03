@@ -1,10 +1,10 @@
-# 🎮 C64Vibe - MI alapú Commodore 64 játékfejlesztés
+# 🎮 VibeC64 - MI alapú Commodore 64 játékfejlesztés
 
-Üdvözöl a **C64Vibe**, az AI-asszisztensed Commodore 64 BASIC V2.0 játékok készítéséhez!
+Üdvözöl a **VibeC64**, az AI-asszisztensed Commodore 64 BASIC V2.0 játékok készítéséhez!
 
-## Mire képes a C64Vibe?
+## Mire képes a VibeC64?
 
-A C64Vibe egy intelligens AI-asszisztens, amely segít életre kelteni retro játékötleteidet. A következőkre képes:
+A VibeC64 egy intelligens AI-asszisztens, amely segít életre kelteni retro játékötleteidet. A következőkre képes:
 
 - 🎨 **Játéktervezés** – A játékötleteidet részletes tervekké alakítja: történettel, karakterekkel, helyszínekkel és játékmenet-mechanikákkal.
 - 💻 **C64 BASIC V2.0 kódírás** – Szintaktikailag helyes BASIC programokat generál, amelyek valódi Commodore 64 hardveren is futtathatók.
@@ -13,7 +13,7 @@ A C64Vibe egy intelligens AI-asszisztens, amely segít életre kelteni retro já
 - 🎮 **Játék indítása C64 emulátorban** – Alternatív megoldásként az elkészült programot közvetlenül megnyithatod egy online [C64 emulátorban](https://ty64.krissz.hu/).
 - 🎯 **Futtatás valódi hardveren** – Betöltheted és futtathatod a programokat valódi C64 hardveren KungFu Flash segítségével (csatlakoztatott állapotban; ez a funkció az online verzióban nem, csak a helyileg futtatott változatban érhető el). Hamarosan Commodore 64 Ultimate támogatás is elérhető lesz.
 
-## Hogyan használd a C64Vibe-ot?
+## Hogyan használd a VibeC64-ot?
 
 A kezdés egyszerű – csak írd le (egyelőre angolul a legbiztosabb, de magyarul is lehet), mit szeretnél készíteni!
 
@@ -39,7 +39,7 @@ Ha új munkamenetben vagy, de megvan az eredeti BAS forráskód fájl, feltölth
 
 ### Hardvertámogatás:
 
-A C64Vibe fizikai hardverrel és anélkül is használható:
+A VibeC64 fizikai hardverrel és anélkül is használható:
 
 - ✅ **Csak szoftver** – C64 programok generálása és letöltése emulátorban való futtatáshoz.
 - ✅ **Hardverrel** – KungFu Flash, C64 billentyűzet és videó input eszköz csatlakoztatása a teljes hardveres integrációhoz. Hamarosan Commodore 64 Ultimate támogatás is elérhető lesz.
@@ -54,4 +54,4 @@ A legjobb élmény és költséghatékonyság érdekében a **Google Gemini 3.0 
 
 ---
 
-**Készen állsz egy kis retro varázslatra?** Csak írd be a játékötletedet alább, és hagyd, hogy a C64Vibe elvégezze a többit! 🚀
+**Készen állsz egy kis retro varázslatra?** Csak írd be a játékötletedet alább, és hagyd, hogy a VibeC64 elvégezze a többit! 🚀
