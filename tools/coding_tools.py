@@ -5,19 +5,16 @@ from pydantic import BaseModel, Field
 import utils.agent_utils as agent_utils
 import utils.c64_syntax_checker as c64_syntax_checker
 
-
 from tools.agent_state import C64VibeAgentState
 
 from langchain.tools import tool, ToolRuntime
 from typing import Annotated, Literal, NotRequired
 from langgraph.types import Command
 from langchain_core.messages import ToolMessage
-from langchain_core.output_parsers import PydanticOutputParser
 
 from chainlit.utils import utc_now
 
 LOAD_EXAMPLE_PROGRAMS = True
-
 
 class CodingTools:
     def __init__(self, llm_access, cl = None):

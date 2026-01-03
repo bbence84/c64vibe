@@ -11,10 +11,16 @@
 
 import os
 import uuid
+import base64
+import logging
 import chainlit as cl
 from typing import Dict, Optional
 
 from chainlit.input_widget import Select, Switch, TextInput
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 from langchain.agents import create_agent
 from langgraph.checkpoint.memory import MemorySaver
@@ -26,7 +32,6 @@ from langchain.messages import AIMessage, AIMessageChunk, AnyMessage, ToolMessag
 
 from utils.llm_access import LLMAccessProvider
 from utils.chainlit_middleware import ChainlitMiddlewareTracer
-import utils.agent_utils as agent_utils
 
 from tools.agent_state import C64VibeAgentState
 from tools.coding_tools import CodingTools
@@ -52,6 +57,8 @@ set_model_settings_alert = '<span style="color:red">⚠️**Set your AI model an
 async def on_chat_start():
     cl.user_session.set("llm_access_provider", LLMAccessProvider())
     cl.user_session.set("hw_access_tools", HWAccessTools())
+    
+    logger.info("Loading AI model from environment variables...")
 
     load_ai_model_from_env()
 
@@ -95,8 +102,9 @@ async def initialize_agent():
     {"- Use the CaptureC64Screen tool to capture the current screen of the C64 and analyze what is displayed, i.e to verify if the program started and looks good." if hw_access_tools.is_capture_device_connected() else ""}
     - No need to persist and edit the source code during the creation process, as the agent has external memory to store the current source code.
     - At the end of the process, don't provide links to the PRG or BASE files, just state that the files are ready for download.
-    Throughout the process, make use of the todo tool to keep track of your tasks and ensure all steps are completed systematically.
+    Throughout the process, make use of the write_todos tool to keep track of your tasks and ensure all steps are completed systematically.
     Communicate with the user in English, even if the game itself is to be created in another language.
+    At the end of the tasks, update the todo list with write_todos to mark all tasks as completed.
     """
 
     program_path = os.path.abspath(f"output")
@@ -180,7 +188,7 @@ def load_ai_model_from_env():
         try:
             llm_access_provider.set_llm_model(model_name_technical=model_name, model_provider=model_provider, api_key=api_key, use_openrouter=use_openrouter)
         except Exception as e:
-            print(f"Error setting LLM model from env: {e}")
+            logger.error(f"Error setting LLM model from env: {e}")
             cl.user_session.set("model_init_success", False)
             return
         cl.user_session.set("llm_access_provider", llm_access_provider)
@@ -231,41 +239,13 @@ async def on_message(message: cl.Message):
 
     agent_config = {"configurable": {"thread_id": thread_id}, "recursion_limit": 50}
 
-    attachment_message = None
-    if message.elements:
-        attachments = [file for file in message.elements if
-                                "text/plain" in file.mime or 
-                                "image/png" in file.mime or 
-                                "image/jpg" in file.mime or
-                                "image/jpeg" in file.mime or
-                                "application/octet-stream" in file.mime]       
-        if len(attachments) > 0:  
-            uploaded_file = attachments[0]
-            if uploaded_file.mime.startswith("image/"):
-                file_type = "image"
-            else:
-                file_type = "text"
+    additional_messages = get_messages_from_attachments(message)
 
-            if file_type == "image":
-                attachment_message = agent_utils.get_message_for_image(uploaded_file.path)
-            else:
-                try:
-                    with open(uploaded_file.path, "r", encoding="utf-8") as f:
-                        file_content = f.read()
-                        file_is_binary = False
-                except Exception as e:
-                    file_is_binary = True
-                if not file_is_binary:
-                    attachment_message = { "type": "text", "text": file_content }
-                else:
-                    attachment_message = None
-
-    if attachment_message:
-        agent_messages = [{"role": "user", "content": [{"type": "text", "text": message.content}, attachment_message]}] 
+    if additional_messages != []:
+        #logger.debug("Additional messages from attachments: %s", additional_messages)
+        agent_messages = [{"role": "user", "content": [{"type": "text", "text": message.content}, *additional_messages]}] 
     else:
         agent_messages = [{"role": "user", "content": message.content}]           
-
-
 
     msg = cl.Message(content="")
     await msg.send()
@@ -281,6 +261,43 @@ async def on_message(message: cl.Message):
                 await msg.stream_token(token.text)
 
     await msg.update()
+    task_list = cl.user_session.get("task_list")
+    if task_list is not None:
+        task_list.status = "Done"
+        await task_list.send()
+        #cl.user_session.set("task_list", None)
+
+def get_messages_from_attachments(message: cl.Message):
+    additional_messages = []
+    if message.elements:
+        attachments = [file for file in message.elements if
+                                "text/plain" in file.mime or 
+                                "image/png" in file.mime or 
+                                "image/jpg" in file.mime or
+                                "image/jpeg" in file.mime or
+                                "application/octet-stream" in file.mime]       
+        for uploaded_file in attachments:
+            if uploaded_file.mime.startswith("image/"):
+                file_type = "image"
+            else:
+                file_type = "text"
+
+            if file_type == "image":
+                with open(uploaded_file.path, "rb") as image_file:
+                    file_buffer = image_file.read()
+                    b64 = base64.b64encode(file_buffer).decode()
+                    img_message = { "type": "image_url", "image_url": { "url": f"data:image/png;base64,{b64}" , },}                
+                    additional_messages.append(img_message)
+            else:
+                try:
+                    with open(uploaded_file.path, "r", encoding="utf-8") as f:
+                        file_content = f.read()
+                        file_is_binary = False
+                except Exception as e:
+                    file_is_binary = True
+                if not file_is_binary:
+                    additional_messages.append({ "type": "text", "text": file_content })
+    return additional_messages
 
 async def change_agent_settings(settings):
     llm_model = settings["LLMSelector"]

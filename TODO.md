@@ -3,10 +3,9 @@
 
 - ✓ Convert to web based UI
   - Auto popup right away for setting LLM model and API key if not set
-  - Ability to upload generated bas file with a screenshot for fixing
+  - ✓ Ability to upload generated bas file with a screenshot for fixing
   - Support Hungarian language in the UI: Chainlit and custom messages and UI texts
   - Conversation starters
-  - Download also conversation summary for later upload
   - Experimental Commodore 64 Ultimate REST API support for program loading/running/restarting
   - ✓ Instructions on getting an API key on OpenRouter
   - ✓ Settings for LLM provider and model selection and API keys 
@@ -16,16 +15,17 @@
   - ✓ Better welcome message with hardware status and readme.md for the UI
   - ✓ Don't save the generated prg and bas files on the server, only offer for download
   - ✓ Open generated game in an online C64 emulator directly from the UI
+  - Custom TODO middleware for getting tool_name for TODO item and more detailed progress tracking
 - Capture device support for screen capture tool redo
 - Instruction to immediately start outputting a confirmation when the agent starts
-- HIGH_PRIO Improve error handling and logging
+- ✓ Improve error handling and logging
 - Store API keys in local storage or session storage 
 - Provide examples for fancy texts for games
 - Human in the loop for approval before creating the source code
 - Check if thinking mode is better vs. non thinking mode for Gemini, check reasoning traces
 - Test case generation and execution
 - Fix file save https://github.com/langchain-ai/deepagents/pull/336
-- Clean up for open-source release
+- ✓ Clean up for open-source release
 - (PRO) Registration, persist conversations and allow loading previous sessions
 - (PRO) Sprite and graphic asset generation tools using generative AI models and convert to C64 formats
 - (PRO) Sound effect and music generation tools

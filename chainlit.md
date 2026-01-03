@@ -11,7 +11,7 @@ C64Vibe is an intelligent AI agent that helps you bring your retro gaming ideas 
 - 🔍 **Check & Fix Syntax** - Automatically validate your code and fix any syntax errors
 - 💾 **Export Programs** - Download your creations as .BAS and .PRG files
 - 🎮 **Launch Game in C64 Emulator** - Alternatively, open the created program directly in an online [C64 emulator](https://ty64.krissz.hu/)
-- 🎯 **Run on Real Hardware** - Load and execute programs on actual C64 hardware via KungFu Flash (when connected, not available in the online version, only in locally hosted one)
+- 🎯 **Run on Real Hardware** - Load and execute programs on actual C64 hardware via KungFu Flash (when connected, not available in the online version, only in locally hosted one). Commodore 64 Ultimate support coming soon!
 
 ## How to Use C64Vibe
 
@@ -36,7 +36,7 @@ Getting started is simple - just describe what you want to create in plain Engli
 C64Vibe works with or without physical hardware:
 
 - ✅ **Software Only** - Generate and download C64 programs to run in an emulator
-- ✅ **With Hardware** - Connect KungFu Flash, C64 keyboard, and capture device for full hardware integration
+- ✅ **With Hardware** - Connect KungFu Flash, C64 keyboard, and capture device for full hardware integration. Commodore 64 Ultimate support coming soon!
 
 ### Getting an AI Model Provider API Key
 

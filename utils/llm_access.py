@@ -1,5 +1,8 @@
 import os
+import logging
 from langchain.chat_models import init_chat_model
+
+logger = logging.getLogger(__name__)
 
 # from dotenv import load_dotenv
 # load_dotenv()
@@ -43,9 +46,9 @@ class LLMAccessProvider:
         try:
             self.llm_model = self.init_llm_model()
             self.llm_model.invoke([{"role": "user", "content": "Test message"}])
-            print(f"LLMAccessProvider: Successfully initialized LLM model {self.model_name} from provider {self.model_provider}, using OpenRouter: {use_openrouter}")
+            logger.info(f"LLMAccessProvider: Successfully initialized LLM model {self.model_name} from provider {self.model_provider}, using OpenRouter: {use_openrouter}")
         except Exception as e:
-            print(f"Error setting LLM model: {e}")
+            logger.error(f"Error setting LLM model: {e}")
             self.llm_model = None
             return False
 
@@ -70,7 +73,7 @@ class LLMAccessProvider:
             else:
                 raise ValueError(f"Unsupported model provider: {self.model_provider}")
         except Exception as e:
-            print(f"Error initializing LLM model: {e}")
+            logger.error(f"Error initializing LLM model: {e}")
             return None
 
     def get_llm_model(self, create_new=False, streaming=False):

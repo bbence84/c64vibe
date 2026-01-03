@@ -12,8 +12,11 @@ import serial
 import serial.tools.list_ports
 import time
 import struct
+import logging
 from pathlib import Path
 from typing import Optional, Union
+
+logger = logging.getLogger(__name__)
 
 
 class KungFuFlashUSB:
@@ -63,7 +66,7 @@ class KungFuFlashUSB:
             # KungFuFlash2 shows up as a standard CDC/ACM serial device
             # You might need to adjust this detection logic
             if 'USB' in port.description or 'Serial' in port.description:
-                print(f"Found potential device: {port.device} - {port.description}")
+                logger.info(f"Found potential device: {port.device} - {port.description}")
                 return port.device
         return None
 
@@ -136,7 +139,7 @@ class KungFuFlashUSB:
             # Send handshake (12 bytes)
             bytes_written = self.serial.write(handshake)
             if bytes_written != 12:
-                print(f"Handshake attempt {attempt + 1}: Failed to write all bytes ({bytes_written}/12)")
+                logger.warning(f"Handshake attempt {attempt + 1}: Failed to write all bytes ({bytes_written}/12)")
                 time.sleep(0.5)
                 continue
                 
@@ -154,31 +157,31 @@ class KungFuFlashUSB:
                 response = self.serial.read(5)
                 
                 if len(response) == 0:
-                    print(f"Handshake attempt {attempt + 1}: No response from device (may still be initializing)")
+                    logger.warning(f"Handshake attempt {attempt + 1}: No response from device (may still be initializing)")
                     time.sleep(1)
                     continue
                 elif len(response) != 5:
-                    print(f"Handshake attempt {attempt + 1}: Invalid response length ({len(response)} bytes): {response.hex()}")
+                    logger.warning(f"Handshake attempt {attempt + 1}: Invalid response length ({len(response)} bytes): {response.hex()}")
                     time.sleep(0.5)
                     continue
                     
                 response_str = response[:4].decode('ascii', errors='ignore')
-                print(f"Handshake response: [{response_str}]")
+                logger.debug(f"Handshake response: [{response_str}]")
                 
                 if response_str == "WAIT":
-                    print("Device busy, waiting...")
+                    logger.info("Device busy, waiting...")
                     time.sleep(1)
                     continue
                 elif response_str == "LOAD" or response_str.startswith("L"):
                     return True
                 else:
-                    print(f"Unexpected response: {response_str} (hex: {response.hex()})")
+                    logger.warning(f"Unexpected response: {response_str} (hex: {response.hex()})")
                     # Don't return False yet, retry
                     time.sleep(0.5)
                     continue
                     
             except (serial.SerialTimeoutException, UnicodeDecodeError, serial.SerialException) as e:
-                print(f"Handshake attempt {attempt + 1} failed: {e}")
+                logger.warning(f"Handshake attempt {attempt + 1} failed: {e}")
                 time.sleep(0.5)
                 continue
                 
@@ -214,29 +217,29 @@ class KungFuFlashUSB:
             prg_data = f.read()
             
         if len(prg_data) < 2:
-            print("Error: PRG file too small (must be at least 2 bytes)")
+            logger.error("Error: PRG file too small (must be at least 2 bytes)")
             return False
             
         if verbose:
-            print(f"Loaded PRG file: {filepath.name} ({len(prg_data)} bytes)")
+            logger.info(f"Loaded PRG file: {filepath.name} ({len(prg_data)} bytes)")
             
         # Send handshake
         if verbose:
-            print("Sending handshake: EFSTART:PRG")
+            logger.info("Sending handshake: EFSTART:PRG")
         
         try:
             
             if not self._send_handshake("PRG"):
-                print("Handshake failed")
+                logger.error("Handshake failed")
                 return False
                 
             if verbose:
-                print("Sending PRG file...")
+                logger.info("Sending PRG file...")
                 
             # Read how many bytes the device wants
             chunk_size_bytes = self.serial.read(2)
             if len(chunk_size_bytes) != 2:
-                print("Error: Could not read chunk size")
+                logger.error("Error: Could not read chunk size")
                 return False
                 
             chunk_size = struct.unpack('<H', chunk_size_bytes)[0]
@@ -254,29 +257,29 @@ class KungFuFlashUSB:
                 # Send chunk size (little-endian 16-bit)
                 size_bytes = struct.pack('<H', len(chunk))
                 if self.serial.write(size_bytes) != 2:
-                    print("\nError: Failed to send chunk size")
+                    logger.error("Error: Failed to send chunk size")
                     return False
                     
                 # Send chunk data
                 if self.serial.write(chunk) != len(chunk):
-                    print("\nError: Failed to send chunk data")
+                    logger.error("Error: Failed to send chunk data")
                     return False
                     
                 total_sent += len(chunk)
                 offset += len(chunk)
                 
                 if verbose:
-                    print(f"\rBytes sent: {total_sent:6d}", end='', flush=True)
+                    logger.info(f"Bytes sent: {total_sent:6d}")
                     
                 # If we sent less than chunk_size, we're done
                 if len(chunk) < chunk_size:
                     break
                     
             if verbose:
-                print("\n\nDONE!")
+                logger.info("DONE!")
 
         except (serial.SerialException, BaseException) as e:
-            print(f"Serial error during PRG send: {e}")
+            logger.error(f"Serial error during PRG send: {e}")
             return False
             
         return True
@@ -306,7 +309,7 @@ class KungFuFlashUSB:
             raise RuntimeError("Serial port not connected")
             
         if verbose:
-            print("Sending return to menu command...")
+            logger.info("Sending return to menu command...")
             
         # Send the efstart:mnu command (must be exactly 12 bytes with null terminator)
         # Format: "efstart:" (8 bytes) + "mnu" (3 bytes) + "\x00" (1 byte) = 12 bytes
@@ -317,7 +320,7 @@ class KungFuFlashUSB:
         self.serial.flush()
         
         if verbose:
-            print("Menu command sent. Cartridge is restarting...")
+            logger.info("Menu command sent. Cartridge is restarting...")
         
         # The cartridge will reset, which disconnects USB
         # Close our connection and wait for the device to reset
@@ -326,28 +329,28 @@ class KungFuFlashUSB:
         if reconnect:
             # Wait for the cartridge to reset and USB to reinitialize
             if verbose:
-                print("Waiting for cartridge to restart...")
+                logger.info("Waiting for cartridge to restart...")
             time.sleep(2.0)  # Give the device time to reset
             
             # Reconnect
             if verbose:
-                print("Reconnecting...")
+                logger.info("Reconnecting...")
             
             max_retries = 4
             for attempt in range(max_retries):
                 try:
                     self.connect()
                     if verbose:
-                        print(f"Reconnected to {self.port}")
+                        logger.info(f"Reconnected to {self.port}")
                     return True
                 except Exception as e:
                     if attempt < max_retries - 1:
                         if verbose:
-                            print(f"Reconnect attempt {attempt + 1} failed, retrying...")
+                            logger.warning(f"Reconnect attempt {attempt + 1} failed, retrying...")
                         time.sleep(0.5)
                     else:
                         if verbose:
-                            print(f"Failed to reconnect: {e}")
+                            logger.error(f"Failed to reconnect: {e}")
                         return False
         
         return True
@@ -381,18 +384,18 @@ class KungFuFlashUSB:
             crt_data = f.read()
             
         if verbose:
-            print(f"Loaded CRT file: {filepath.name} ({len(crt_data)} bytes)")
+            logger.info(f"Loaded CRT file: {filepath.name} ({len(crt_data)} bytes)")
             
         # Send handshake
         if verbose:
-            print("Sending handshake: EFSTART:CRT")
+            logger.info("Sending handshake: EFSTART:CRT")
             
         if not self._send_handshake("CRT"):
-            print("Handshake failed")
+            logger.error("Handshake failed")
             return False
             
         if verbose:
-            print("Sending CRT file...")
+            logger.info("Sending CRT file...")
             
         # Send the entire file
         total_sent = 0
@@ -404,53 +407,9 @@ class KungFuFlashUSB:
             total_sent += sent
             
             if verbose:
-                print(f"\rBytes sent: {total_sent:6d}", end='', flush=True)
+                logger.info(f"Bytes sent: {total_sent:6d}")
                 
         if verbose:
-            print("\n\nDONE!")
+            logger.info("DONE!")
             
         return True
-
-
-def main():
-    """Example usage of the KungFuFlashUSB class."""
-    import sys
-    
-    if len(sys.argv) < 3:
-        print("Usage: python kungfuflash_usb.py <port> <command> [file]")
-        print("\nCommands:")
-        print("  send <file.prg>   - Send and execute a PRG file")
-        print("  menu              - Return to launcher menu")
-        print("\nExamples:")
-        print("  python kungfuflash_usb.py COM3 send myprogram.prg")
-        print("  python kungfuflash_usb.py /dev/ttyACM0 menu")
-        sys.exit(1)
-        
-    port = sys.argv[1]
-    command = sys.argv[2].lower()
-    
-    try:
-        with KungFuFlashUSB(port) as kff:
-            if command == "send":
-                if len(sys.argv) < 4:
-                    print("Error: PRG filename required")
-                    sys.exit(1)
-                filename = sys.argv[3]
-                success = kff.send_prg(filename)
-                sys.exit(0 if success else 1)
-                
-            elif command == "menu":
-                success = kff.return_to_menu()
-                sys.exit(0 if success else 1)
-                
-            else:
-                print(f"Unknown command: {command}")
-                sys.exit(1)
-                
-    except Exception as e:
-        print(f"Error: {e}")
-        sys.exit(1)
-
-
-if __name__ == '__main__':
-    main()

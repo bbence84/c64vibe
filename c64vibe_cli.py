@@ -41,14 +41,14 @@ console = Console()
 def load_ai_model_from_env():
     global llm_access_provider
     model_provider = os.getenv("AI_MODEL_PROVIDER")
-    model_name = os.getenv("AI_MODEL_NAME")     
-    openrouter_api_key = os.getenv("OPENROUTER_API_KEY")
+    model_name = os.getenv("AI_MODEL_NAME") 
+    api_key = os.getenv("API_KEY")    
 
     use_openrouter = False
-    if openrouter_api_key != "" and openrouter_api_key is not None:
+    if model_provider == "openrouter":
         use_openrouter = True            
     try:
-        llm_access_provider.set_llm_model(model_name_technical=model_name, model_provider=model_provider, use_openrouter=use_openrouter)
+        llm_access_provider.set_llm_model(model_name_technical=model_name, api_key=api_key,model_provider=model_provider, use_openrouter=use_openrouter)
     except Exception as e:
         print(f"Error setting LLM model from env: {e}")        
 

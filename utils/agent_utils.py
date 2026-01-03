@@ -10,14 +10,6 @@ sys.path.append(str(Path(__file__).parent.parent))
 
 from utils.bas2prg import Bas2Prg
 
-def get_message_for_image(image_path):
-    with open(image_path, "rb") as image_file:
-        file_buffer = image_file.read()
-        b64 = base64.b64encode(file_buffer).decode()
-        img_base64 = f"data:image/png;base64,{b64}"  
-        img_message = { "type": "image_url", "image_url": { "url": img_base64, },}
-    return img_message
-
 def get_message_content(content):
     """
     Extracts text content from a message which may contain text and other elements.

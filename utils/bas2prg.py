@@ -2,6 +2,9 @@ import struct
 import argparse
 import sys
 import re
+import logging
+
+logger = logging.getLogger(__name__)
 
 # Exact token list from tokens.c
 # Indices 0-127 correspond to bytes 0x80-0xFF
@@ -225,11 +228,11 @@ def main():
         else:
             start_addr = int(s_addr)
     except ValueError:
-        print(f"Invalid start address: {s_addr}", file=sys.stderr)
+        logger.error(f"Invalid start address: {s_addr}")
         sys.exit(1)
 
     if args.debug:
-        print(f"Load address: ${start_addr:04X}", file=sys.stderr)
+        logger.debug(f"Load address: ${start_addr:04X}")
 
     # Input handling
     if args.filename:
@@ -238,7 +241,7 @@ def main():
             with open(args.filename, 'r', encoding='utf-8', errors='replace') as f:
                 source_text = f.read()
         except Exception as e:
-            print(f"Error reading input: {e}", file=sys.stderr)
+            logger.error(f"Error reading input: {e}")
             sys.exit(3)
     else:
         source_text = sys.stdin.read()
@@ -259,12 +262,12 @@ def main():
             with open(args.output, 'wb') as f:
                 f.write(prg_data)
         except Exception as e:
-            print(f"Unable to create output '{args.output}': {e}", file=sys.stderr)
+            logger.error(f"Unable to create output '{args.output}': {e}")
             sys.exit(2)
     else:
         # Write to stdout
         if sys.stdout.isatty():
-            print("Binary data not written to terminal. Use -o or redirect output.", file=sys.stderr)
+            logger.warning("Binary data not written to terminal. Use -o or redirect output.")
         else:
             sys.stdout.buffer.write(prg_data)
 

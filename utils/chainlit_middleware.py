@@ -9,9 +9,12 @@ from chainlit.context import context_var
 from chainlit.step import Step
 from chainlit.utils import utc_now
 import chainlit as cl
+import logging
 
 from typing import Any
 from typing import cast
+
+logger = logging.getLogger(__name__)
 
 class ChainlitMiddlewareTracer(AgentMiddleware if AgentMiddleware != object else object):
     """
@@ -71,7 +74,7 @@ class ChainlitMiddlewareTracer(AgentMiddleware if AgentMiddleware != object else
                 #step.input, step.language = self._process_content(tool_input)
                 #step.show_input = step.language or False
             except Exception as e:
-                print(f"Error formatting tool input for Chainlit: {e}")
+                logger.error(f"Error formatting tool input for Chainlit: {e}")
                 step.input = str(tool_input)
                 step.show_input = True
 
@@ -87,12 +90,12 @@ class ChainlitMiddlewareTracer(AgentMiddleware if AgentMiddleware != object else
             # Format the output
             try:
                 #step.output, step.language = self._process_content(result.content)
-                tool_formatted_output, text_language = self._format_output(tool_name, result)
+                tool_formatted_output, text_language = await self._format_output(tool_name, result)
                 if text_language == "basic":
                     tool_formatted_output = f"```basic\n{tool_formatted_output}\n```"
                 step.output = tool_formatted_output
             except Exception as e:
-                print(f"Error formatting tool output for Chainlit: {e}, tool_name: {tool_name}, result: {result}")
+                logger.error(f"Error formatting tool output for Chainlit: {e}, tool_name: {tool_name}, result: {result}")
                 step.output = str(result)
 
             step.end = utc_now()
@@ -108,7 +111,7 @@ class ChainlitMiddlewareTracer(AgentMiddleware if AgentMiddleware != object else
             await step.update()
             raise
     
-    def _format_output(self, tool_name: str, tool_output: Any) -> tuple[dict | str, str | None]:
+    async def _format_output(self, tool_name: str, tool_output: Any) -> tuple[dict | str, str | None]:
         """
         Format tool output for display in Chainlit.
 
@@ -126,7 +129,7 @@ class ChainlitMiddlewareTracer(AgentMiddleware if AgentMiddleware != object else
                 return tool_output.content, "markdown"
             case "WriteTodos":
                 tool_command = cast(Command, tool_output)
-                return self._format_todos(tool_command.update.get("todos", [])), "markdown"
+                return await self._format_todos(tool_command.update.get("todos", [])), "markdown"
             case "CreateUpdateC64BasicCode" | "StoreSourceInAgentMemory":
                 tool_command = cast(Command, tool_output)
                 return tool_command.update.get("current_source_code", ""), "basic"
@@ -185,7 +188,7 @@ class ChainlitMiddlewareTracer(AgentMiddleware if AgentMiddleware != object else
                 return self._process_content(tool_input) + (True,)
             
 
-    def _format_todos(self, todos_data):
+    async def _format_todos(self, todos_data):
         """Format and display a todo list as a markdown table.
         
         Args:
@@ -219,6 +222,10 @@ class ChainlitMiddlewareTracer(AgentMiddleware if AgentMiddleware != object else
             "| # | Status | Task |",
             "|--:|:------|:-----|"
         ]
+
+        task_list = cl.TaskList()
+        task_list.status = "Running..."
+        cl.user_session.set("task_list", task_list)
         
         # Add todos to table
         for idx, todo in enumerate(todos, 1):
@@ -230,6 +237,23 @@ class ChainlitMiddlewareTracer(AgentMiddleware if AgentMiddleware != object else
             status_display = f"{emoji} {status.replace('_', ' ').title()}"
             
             lines.append(f"| {idx} | {status_display} | {content} |")
+
+            match status:
+                case "completed":
+                    task_status = cl.TaskStatus.DONE
+                case "in_progress":
+                    task_status = cl.TaskStatus.RUNNING
+                case "not_started" | "pending":
+                    task_status = cl.TaskStatus.READY
+                case "blocked":
+                    task_status = cl.TaskStatus.FAILED
+                case _:
+                    task_status = cl.TaskStatus.READY      
+
+            task = cl.Task(title=content, status=task_status)
+            await task_list.add_task(task)       
+
+        await task_list.send()     
         
         return "\n".join(lines)
 

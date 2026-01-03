@@ -1,5 +1,6 @@
 import os
 import time
+import logging
 from typing_extensions import runtime
 
 from utils.c64_hw import C64HardwareAccess
@@ -7,6 +8,8 @@ from utils.kungfuflash_usb import KungFuFlashUSB
 import utils.agent_utils as agent_utils
 from tools.agent_state import C64VibeAgentState
 from langchain.tools import tool, ToolRuntime
+
+logger = logging.getLogger(__name__)
 
 class HWAccessTools:
     def __init__(self):
@@ -29,7 +32,7 @@ class HWAccessTools:
             self.c64keyboard = C64HardwareAccess(device_port=keyboard_port, baud_rate=19200, debug=False)
             self.c64keyboard_connected = True
         except Exception as e:
-            print(f"Warning: Could not connect to C64 keyboard hardware on port {keyboard_port}. Continuing without keyboard access.")
+            logger.warning(f"Could not connect to C64 keyboard hardware on port {keyboard_port}. Continuing without keyboard access.")
             self.c64keyboard_connected = False
 
     def _init_kungfu_flash(self):
@@ -38,7 +41,7 @@ class HWAccessTools:
             self.kungfuflash = KungFuFlashUSB(port=kungfu_flash_port)
             self.kungfuflash_connected = True
         except Exception as e:
-            print(f"Warning: Could not connect to KungFuFlash on port {kungfu_flash_port}. Continuing without KungFuFlash access.")
+            logger.warning(f"Could not connect to KungFuFlash on port {kungfu_flash_port}. Continuing without KungFuFlash access.")
             self.kungfuflash_connected = False
 
     def tools(self):
