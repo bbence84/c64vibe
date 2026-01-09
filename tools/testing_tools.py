@@ -47,7 +47,7 @@ class TestingTools:
                 self.model_coder = self.llm_access.get_llm_model(create_new=True, streaming=False)
             return self._analyze_game_mechanics(runtime)
 
-        tools = []
+        tools = [analyze_game_mechanics]
         if self.capture_device_connected:
             tools.append(capture_c64_screen)
 

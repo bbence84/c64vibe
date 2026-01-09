@@ -4,9 +4,6 @@ from langchain.chat_models import init_chat_model
 
 logger = logging.getLogger(__name__)
 
-# from dotenv import load_dotenv
-# load_dotenv()
-
 class LLMAccessProvider:
     def __init__(self):
         self.llm_model = None

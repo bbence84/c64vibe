@@ -42,7 +42,8 @@ from tools.game_design_tools import GameDesignTools
 from tools.hw_access_tools import HWAccessTools
 
 from dotenv import load_dotenv
-load_dotenv()
+env_file = os.getenv("ENV_FILE", ".env")
+load_dotenv(env_file)
 
 set_model_settings_alert = '<span style="color:red">⚠️**Set your AI model and API key in the Settings panel (⚙️ icon in the chat input area below) before proceeding.**⚠️</span>'
 
@@ -105,6 +106,7 @@ async def initialize_agent():
     {"- If at any point you need to restart the C64 hardware, use the RestartC64 tool." if testing_tools.is_c64keyboard_connected() else ""}
     {"- Use the CaptureC64Screen tool to capture the current screen of the C64 and analyze what is displayed, i.e to verify if the program started and looks good." if testing_tools.is_capture_device_connected() else ""}
     - No need to persist and edit the source code during the creation process, as the agent has external memory to store the current source code.
+    - Don't use the tool AnalyzeGameMechanics unless it's explicitly needed i.e. to test the game directly on the hardware, when the task is to test the game.ű
     
     At the end of the process, don't provide links to the PRG or BASE files, just state that the files are ready for download or execution.
     Throughout the process, make use of the write_todos tool to keep track of your tasks and ensure all steps are completed systematically.

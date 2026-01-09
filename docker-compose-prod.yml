@@ -4,14 +4,15 @@ services:
   vibec64:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile-prod
     container_name: vibec64
     ports:
       - "8030:8030"
     env_file:
-      - .env
+      - .env.prod
     environment:
       - PORT=8030
+      - ENV_FILE=.env.prod
     volumes:
       # Persist output files
       - ./output:/app/output

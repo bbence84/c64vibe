@@ -32,6 +32,9 @@ class GameDesignTools:
             Provide the design plan in a structured format, using Markdown.
             The design plan should not contain any code, only the design details.
             The design plan should consider the technical limitations of the Commodore 64, including graphics, sound, and memory constraints.
+            
+            In case the requested game is too complex for the C64, i.e. it contains 3D graphics or advanced physics, tell the user that the game idea is too complex for the C64 and suggest to simplify the game idea.
+            
             """
         llm_design_response = self.model_coder.invoke([{"role": "user", "content": design_instructions}])
         return agent_utils.get_message_content(llm_design_response.content)

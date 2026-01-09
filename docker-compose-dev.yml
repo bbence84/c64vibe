@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  vibec64:
+    build:
+      context: .
+      dockerfile: Dockerfile-test
+    container_name: vibec64
+    ports:
+      - "8029:8029"
+    env_file:
+      - .env.dev
+    environment:
+      - PORT=8029
+      - ENV_FILE=.env.dev
+    volumes:
+      # Persist output files
+      - ./output:/app/output
+      # Persist uploaded files
+      - ./.files:/app/.files
+      # Persist Chainlit data
+      - ./.chainlit:/app/.chainlit
+    restart: unless-stopped
+    # Uncomment if you need hardware access (e.g., serial ports)
+    # devices:
+    #   - /dev/ttyUSB0:/dev/ttyUSB0
+    # privileged: true

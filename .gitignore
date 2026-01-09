@@ -1,6 +1,8 @@
 __pycache__/
 .venv/
 .env
+.env.dev
+.env.prod
 tests/
 .production.env
 node_modules/

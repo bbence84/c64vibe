@@ -160,6 +160,9 @@ class CodingTools:
             - No lowercase letters, only uppercase
             - No special characters outside of those supported by C64 BASIC V2.0, only use PETSCII characters.
             - Don't use accented characters, even for non-English programs.
+            - Don't use pseudo control commands like {{CLR}} {{WHT}} {{DOWN}} {{DOWN}}, use CHR$() commands instead.
+
+            In case the game contains advanced graphics or requires more perforamnce, try to use memory locations and PEEK/POKE commands to set graphics modes, colors, etc.
 
             {'Example BASIC V2.0 programs for reference, to follow C64 BASIC V2.0 syntax:' if load_examples else ""}
             {agent_utils.read_example_programs(num_examples=10) if load_examples else ""}
