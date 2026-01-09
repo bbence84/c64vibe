@@ -4,7 +4,7 @@ services:
   vibec64:
     build:
       context: .
-      dockerfile: Dockerfile-test
+      dockerfile: Dockerfile-dev
     container_name: vibec64
     ports:
       - "8029:8029"
