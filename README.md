@@ -28,6 +28,25 @@ VibeC64 is an AI agent specialized in creating games for the Commodore 64 comput
   - OpenAI
   - OpenRouter (provides access to multiple models with one key)
 
+## 🔑 Getting API Keys
+
+### OpenRouter (easiest)
+1. Register at [openrouter.ai](https://openrouter.ai)
+2. Add credits at [openrouter.ai/settings/credits](https://openrouter.ai/settings/credits)
+3. Get API key at [openrouter.ai/settings/keys](https://openrouter.ai/settings/keys)
+4. Provides access to multiple AI models with single key
+
+### Direct Provider Keys
+- **Google**: [aistudio.google.com/app/api-keys](https://aistudio.google.com/app/api-keys)
+- **Anthropic**: [console.anthropic.com](https://console.anthropic.com)
+- **OpenAI**: [platform.openai.com/api-keys](https://platform.openai.com/api-keys)
+
+### Recommended Models
+- **Best Price / Performance**: Google Gemini 3.0 Flash Preview (fast & cost-effective)
+- **Highest Quality**: Anthropic Claude 4.5 Sonnet or Google Gemini 3.0 Pro (slower but potentially more capable)
+- **Alternative**: OpenAI GPT-5.2 
+- **Open Source**: no open source models have been tested yet, feel free to share your experience with them and report issues (if any)
+
 ### Optional Hardware
 - KungFu Flash USB device, with modified firmware (for loading programs on real C64)
 - Experimental C64U support (using its REST APIs)
@@ -272,24 +291,6 @@ The `resources/examples/` folder contains sample C64 BASIC programs:
 - **commander.bas**: War simulation
 
 These examples are used by the LLM as few-shot examples for better syntax following and game design ideas.
-
-## 🔑 Getting API Keys
-
-### OpenRouter (Recommended)
-1. Register at [openrouter.ai](https://openrouter.ai)
-2. Add credits at [openrouter.ai/settings/credits](https://openrouter.ai/settings/credits)
-3. Get API key at [openrouter.ai/settings/keys](https://openrouter.ai/settings/keys)
-4. Provides access to multiple AI models with single key
-
-### Direct Provider Keys
-- **Google**: [aistudio.google.com/app/api-keys](https://aistudio.google.com/app/api-keys)
-- **Anthropic**: [console.anthropic.com](https://console.anthropic.com)
-- **OpenAI**: [platform.openai.com/api-keys](https://platform.openai.com/api-keys)
-
-### Recommended Models
-- **Best Price / Performance**: Google Gemini 3.0 Flash Preview (fast & cost-effective)
-- **Highest Quality**: Anthropic Claude 4.5 Sonnet or Google Gemini 3.0 Pro (slower but potentially more capable)
-- **Alternative**: OpenAI GPT-5.2
 
 ## 🐛 Troubleshooting
 
