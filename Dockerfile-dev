@@ -28,10 +28,10 @@ COPY . .
 RUN mkdir -p output .files .chainlit public/avatars public/elements resources/examples
 
 # Expose port for Chainlit
-EXPOSE 8030
+EXPOSE 8029
 
 # Default port if not specified
-ENV PORT=8030
+ENV PORT=8029
 
 # Run the application
 CMD chainlit run main.py --host 0.0.0.0 --port ${PORT}
