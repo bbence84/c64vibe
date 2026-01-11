@@ -9,10 +9,11 @@ VibeC64 is an AI agent specialized in creating games for the Commodore 64 comput
 - **AI-Powered Game Design**: Create complete game designs based on an idea
 - **Automatic Code Generation**: Generates syntactically correct C64 BASIC V2.0 code
 - **Syntax Checking**: Built-in LLM-based and rule-based syntax validation
+- **Autonomous Gameplay / Testing**: The AI can test (play) the created game via C64 keyboard and screen capture integration (experimental)
 - **Hardware Integration**: Optional support for real C64 hardware. Only available when deployed locally.
   - Experimental C64U support (using its REST APIs)
   - KungFu Flash USB device for program loading (requires modified firmware)
-  - Direct C64 keyboard control via a custom built device
+  - Direct C64 keyboard control via a custom built device (experimental)
   - Video capture for screen analysis
 - **Dual User Interfaces**: 
   - **Web UI**: User-friendly web interface with file upload and download and emulator integration
@@ -50,7 +51,7 @@ VibeC64 is an AI agent specialized in creating games for the Commodore 64 comput
 ### Optional Hardware
 - KungFu Flash USB device, with modified firmware (for loading programs on real C64)
 - Experimental C64U support (using its REST APIs)
-- USB keyboard interface for C64 (custom built, details coming soon)
+- USB keyboard interface for C64 (details: [utils/c64_keyboard.md](utils/c64_keyboard.md))
 - Video capture device (for screen capture analysis, optional)
 
 ## 🚀 Installation
@@ -80,6 +81,13 @@ API_KEY=your_api_key_here
 # Optional: For LangSmith tracing
 LANGCHAIN_TRACING_V2=false
 LANGCHAIN_API_KEY=your_langsmith_key_here
+
+# Optional: For direct HW access
+# C64_KEYBOARD_DEVICE_PORT=XXX
+# KUNGFU_FLASH_PORT=XXX
+# C64U_API_BASE_URL="http://192.168.1.100"
+# USB_CAMERA_INDEX=0
+
 ```
 Possible AI providers: anthropic, openai, azure_openai, google_genai, openrouter. When using OpenRouter, specify the model name with the prefix as shown on the OpenRouter model page, i.e. google/gemini-3-flash-preview
 
@@ -167,6 +175,7 @@ The agent has access to three main tool categories:
 - **SyntaxChecker**: Validates code syntax using LLM or rule-based checking
 - **FixSyntaxErrors**: Automatically corrects syntax errors
 - **ConvertCodeToPRG**: Converts BASIC text to C64 PRG binary format
+- **StoreSourceInAgentMemory**: Stores an arbitrary BASIC code in the agents memory for processing
 
 ##### **Games Design Tools** (`game_design_tools.py`)
 - **DesignGamePlan**: Creates detailed game design documents using LLM
@@ -182,11 +191,11 @@ The code generation process:
 
 ##### **Testing Tools** (`tools/testing_tools.py`)
 - **CaptureC64Screen**: Captures C64 screen via video input device and compares the screen reading to an expected result
+- **SendTextToC64**: Sends text or keystrokes to the connected physical machine (via a custom Arduino device)
+- **AnalyzeGameMechanics**: Analyzes the source code of the game to learn how it can be played
 
 ##### **Hardware Access Tools** (`tools/hw_access_tools.py`)
-- **RunC64Program**: Loads and executes programs on real C64 via KungFu Flash, using a modified firmware
-- **RestartC64**: Resets the C64 hardware
-- **TypeOnC64**: Sends keyboard input to C64
+- **RunC64Program**: Loads and executes programs on real C64 via KungFu Flash (using a modified firmware) or the C64U API
 
 #### 2. Agent State Management (`tools/agent_state.py`)
 
@@ -256,8 +265,8 @@ When C64 hardware is available:
 
 - **KungFu Flash**: USB device that allows loading programs directly
 - **Commodore 64 Ultimate**: Experimental. Supports sending programs directly to the Commodore 64 Ultimate via its REST APIs
-- **C64 Keyboard**: Serial interface for sending keystrokes
-- **Capture Device**: Video capture for screen analysis via OpenCV
+- **C64 Keyboard**: Experimental. Serial interface for sending keystrokes (for testing the game, details: [utils/c64_keyboard.md](utils/c64_keyboard.md)
+- **Capture Device**: Video capture for screen analysis via OpenCV (for testing the game)
 
 #### 8. Error Handling & Validation
 

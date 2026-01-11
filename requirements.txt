@@ -15,6 +15,6 @@ rich==14.2.0
 requests
 pyserial==3.5
 readchar==4.2.1
-# opencv-python
-# opencv-python-headless
+opencv-python
+opencv-python-headless
 chainlit

@@ -45,6 +45,8 @@ from dotenv import load_dotenv
 env_file = os.getenv("ENV_FILE", ".env")
 load_dotenv(env_file)
 
+RECURSION_LIMIT = 100
+
 set_model_settings_alert = '<span style="color:red">⚠️**Set your AI model and API key in the Settings panel (⚙️ icon in the chat input area below) before proceeding.**⚠️</span>'
 
 # @cl.oauth_callback
@@ -89,6 +91,25 @@ async def initialize_agent():
 
     model_agent = llm_access_provider.get_llm_model()
 
+    if testing_tools.is_c64keyboard_connected() and testing_tools.is_capture_device_connected():
+        testing_instructions = f"""
+        
+        After the game is available (has been created and syntax checked) or loaded into the memory, first use the AnalyzeGameMechanics tool to analyze the game mechanics and learn how to control the game.
+        
+        If the game is not running yet, use the RunC64Program tool to start the game on the connected Commodore 64 hardware using RunC64Program.        
+
+        Then, use the SendTextToC64 tool to send the necessary key presses based on the output of CaptureC64Screen that shows what is currently displayed on the C64 screen.
+        Continue to iterate between CaptureC64Screen and SendTextToC64 to play and test the game on the real C64 hardware.
+        If you enter a command using SendTextToC64, you usually need to also press Enter afterwards to confirm the command.
+        If you only need to send a single keystroke, i.e. "Return", "Space", "0", "1", ..., "9", use the single_key parameter as true of SendTextToC64 to true and send text like "Return" .
+        You can send multiple key presses at once using SendTextToC64, i.e to type in GO SOUTH, but only use commands that are relevant to the current game state and game.
+        If at any point the game seems stuck or glitchy or an error is shown, stop the testing process and tell the user about the issue.
+
+        """
+    else: 
+        testing_instructions = ""
+        
+    
     vibec64_agent_instructions = f"""
     You are VibeC64, an AI Agent specialized in creating games for the Commodore 64 computer.
     Use the various tools at your disposal to create, test, and run C64 BASIC V2.0 games.
@@ -102,12 +123,10 @@ async def initialize_agent():
        - The CreateUpdateC64BasicCode tool should recieve all the details from the game design plan, how the code should be generated, what features to include etc.
     - After generating the code, use the SyntaxChecker tool to ensure there are no syntax errors.
     - If there are syntax errors, correct them using the FixSyntaxErrors tool and re-check them using the SyntaxChecker tool until the code is error-free.
-
-    {"- If at any point you need to restart the C64 hardware, use the RestartC64 tool." if testing_tools.is_c64keyboard_connected() else ""}
-    {"- Use the CaptureC64Screen tool to capture the current screen of the C64 and analyze what is displayed, i.e to verify if the program started and looks good." if testing_tools.is_capture_device_connected() else ""}
     - No need to persist and edit the source code during the creation process, as the agent has external memory to store the current source code.
-    - Don't use the tool AnalyzeGameMechanics unless it's explicitly needed i.e. to test the game directly on the hardware, when the task is to test the game.ű
-    
+
+    {testing_instructions}        
+
     At the end of the process, don't provide links to the PRG or BASE files, just state that the files are ready for download or execution.
     Throughout the process, make use of the write_todos tool to keep track of your tasks and ensure all steps are completed systematically.
     Communicate with the user in English, even if the game itself is to be created in another language.
@@ -138,7 +157,7 @@ async def initialize_agent():
         checkpointer=MemorySaver(),
         state_schema=VibeC64AgentState,
         system_prompt=vibec64_agent_instructions + path_instructions,
-    ).with_config({"recursion_limit": 50})
+    ).with_config({"recursion_limit": RECURSION_LIMIT})
     
     # Store agent in session
     cl.user_session.set("agent", agent)
@@ -265,7 +284,7 @@ async def on_message(message: cl.Message):
     thread_id = cl.user_session.get("thread_id") 
     
 
-    agent_config = {"configurable": {"thread_id": thread_id}, "recursion_limit": 50}
+    agent_config = {"configurable": {"thread_id": thread_id}, "recursion_limit": RECURSION_LIMIT}
 
     additional_messages = get_messages_from_attachments(message)
 

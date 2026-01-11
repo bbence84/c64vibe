@@ -70,7 +70,7 @@ class ChainlitMiddlewareTracer(AgentMiddleware if AgentMiddleware != object else
 
             # Format the tool input
             try:
-                step.input, _, step.show_input  = self._format_input(tool_name, tool_input)
+                step.input, _, step.show_input  = self._format_input(tool_name, tool_input, step)
                 #step.input, step.language = self._process_content(tool_input)
                 #step.show_input = step.language or False
             except Exception as e:
@@ -90,7 +90,7 @@ class ChainlitMiddlewareTracer(AgentMiddleware if AgentMiddleware != object else
             # Format the output
             try:
                 #step.output, step.language = self._process_content(result.content)
-                tool_formatted_output, text_language = await self._format_output(tool_name, result)
+                tool_formatted_output, text_language = await self._format_output(tool_name, result, step)
                 if text_language == "basic":
                     tool_formatted_output = f"```basic\n{tool_formatted_output}\n```"
                 step.output = tool_formatted_output
@@ -111,7 +111,7 @@ class ChainlitMiddlewareTracer(AgentMiddleware if AgentMiddleware != object else
             await step.update()
             raise
     
-    async def _format_output(self, tool_name: str, tool_output: Any) -> tuple[dict | str, str | None]:
+    async def _format_output(self, tool_name: str, tool_output: Any, step: cl.Step) -> tuple[dict | str, str | None]:
         """
         Format tool output for display in Chainlit.
 
@@ -139,6 +139,15 @@ class ChainlitMiddlewareTracer(AgentMiddleware if AgentMiddleware != object else
             case "FixSyntaxErrors":
                 tool_command = cast(Command, tool_output)
                 return tool_command.update.get("current_source_code", ""), "basic"
+            case "CaptureC64Screen":
+                captured_image = cl.Image(path="./output/webcam_snapshot.jpg", name="captured_image", display="inline")
+                step.elements = [captured_image]
+                step.default_open = True                
+                return tool_output.content, "markdown"
+            case "SendTextToC64":
+                return tool_output.content, "markdown"
+            case "AnalyzeGameMechanics":
+                return tool_output.content, "markdown"
             case "RunC64Program":
                 return tool_output.content, "markdown"
             # case "WriteFile":
@@ -147,7 +156,7 @@ class ChainlitMiddlewareTracer(AgentMiddleware if AgentMiddleware != object else
             case _:
                 return self._process_content(tool_output.content)
 
-    def _format_input(self, tool_name: str, tool_input: Any) -> tuple[dict | str, str | None, bool]:
+    def _format_input(self, tool_name: str, tool_input: Any, step: cl.Step) -> tuple[dict | str, str | None, bool]:
         """
         Format tool input for display in Chainlit.
 
@@ -170,6 +179,21 @@ class ChainlitMiddlewareTracer(AgentMiddleware if AgentMiddleware != object else
                     return game_design_description, "text", True
             case "RunC64Program":
                 return "", "text", False
+            case "CaptureC64Screen":
+                step.default_open = True
+                return "", "text", False
+            case "RestartC64" | "AnalyzeGameMechanics":
+                return "", "text", False
+            case "SendTextToC64":
+                text_to_type = tool_input.get("text_to_type", "")
+                press_enter = tool_input.get("press_enter", False)
+                if press_enter:
+                    text_to_type += " [Enter]"
+                if tool_input.get("single_key", False):
+                    text_to_type = f"Key Press: {text_to_type}"
+                else:
+                    text_to_type = f'Text: "{text_to_type}"'
+                return text_to_type, "text", True
             case "DesignGamePlan":
                 return tool_input.get("description", ""), "text", True
             case "StoreSourceInAgentMemory":

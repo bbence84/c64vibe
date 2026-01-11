@@ -1,11 +1,8 @@
-import base64
 import os
-#import cv2
-import time
-import subprocess
 
 import sys
 from pathlib import Path
+
 sys.path.append(str(Path(__file__).parent.parent))
 
 from utils.bas2prg import Bas2Prg
@@ -25,22 +22,6 @@ def get_message_content(content):
     elif isinstance(message, dict):
         return message.get("text", "")
     return str(message)   
-
-def encode_image(image_path):
-    with open(image_path, "rb") as image_file:
-        return base64.b64encode(image_file.read()).decode('utf-8')
-
-def get_webcam_snapshot():
-    return None
-    # file_name = ('output/webcam_snapshot.png')
-    # camera = cv2.VideoCapture(1 + cv2.CAP_DSHOW)  
-    # #camera = cv2.VideoCapture(0)  
-    # camera.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
-    # camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 960)
-    # return_value, image = camera.read()
-    # cv2.imwrite(file_name, image)
-    # del(camera)
-    # return file_name
 
 def read_example_programs(num_examples: int = 5) -> str:
     examples = []
@@ -85,7 +66,7 @@ def format_llm_error_message(model_name: str, error_str: str) -> str:
         return f"❌ {model_name} model call failed: {error_str}"
 
 # if __name__ == "__main__":
-#     #print(get_webcam_snapshot())
-#     #convert_c64_bas_to_prg("""C:\output\guessing_game.bas""")
-#     #hardware_access = C64HardwareAccess(device_port="COM3", baud_rate=19200, debug=False)
-#     send_prg_to_c64("""C:\output\guessing_game.prg""")
+#     print(get_webcam_snapshot())
+# #     #convert_c64_bas_to_prg("""C:\output\guessing_game.bas""")
+# #     #hardware_access = C64HardwareAccess(device_port="COM3", baud_rate=19200, debug=False)
+# #     send_prg_to_c64("""C:\output\guessing_game.prg""")

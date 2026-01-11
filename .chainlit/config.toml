@@ -31,7 +31,7 @@ latex = false
 
 # Autoscroll new user messages at the top of the window
 user_message_autoscroll = true
-# assistant_message_autoscroll = false
+assistant_message_autoscroll = true
 
 # Automatically tag threads with the current chat profile (if a chat profile is used)
 auto_tag_thread = true
