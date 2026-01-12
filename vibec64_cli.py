@@ -62,7 +62,7 @@ model_agent = llm_access_provider.get_llm_model()
 model_screen_ocr = llm_access_provider.get_llm_model()
 
 coding_tools = CodingTools(llm_access=llm_access_provider)
-testing_tools = TestingTools(llm_access=llm_access_provider, capture_device_connected=False)
+testing_tools = TestingTools(llm_access=llm_access_provider)
 hw_access_tools = HWAccessTools()
 game_design_tools = GameDesignTools(llm_access=llm_access_provider)
 
@@ -77,8 +77,8 @@ vibec64_agent_instructions = f"""
     - After generating the code, use the SyntaxChecker tool to ensure there are no synAtax errors.
     - If there are syntax errors, correct them using the FixSyntaxErrors tool and re-check them using the SyntaxChecker tool until the code is error-free.
     { "Use the RunC64Program tool to load and run the final C64 BASIC V2.0 program on the connected Commodore 64 hardware." if hw_access_tools.is_kungfuflash_connected() else "" }
-    { "If at any point you need to restart the C64 hardware, use the RestartC64 tool." if hw_access_tools.is_c64keyboard_connected() else "" }
-    { "Use the CaptureC64Screen tool to capture the current screen of the C64 and analyze what is displayed, i.e to verify if the program started and looks good." if hw_access_tools.is_capture_device_connected() else "" }
+    { "If at any point you need to restart the C64 hardware, use the RestartC64 tool." if testing_tools.is_c64keyboard_connected() else "" }
+    { "Use the CaptureC64Screen tool to capture the current screen of the C64 and analyze what is displayed, i.e to verify if the program started and looks good." if testing_tools.is_capture_device_connected() else "" }
     - No need to persist and edit the source code during the creation process, as the agent has external memory to store the current source code.
     - Only save the final source code to a file at the end of the creation process.
 
@@ -94,6 +94,8 @@ c64_agent_tools = coding_tools.tools() + testing_tools.tools() + hw_access_tools
 
 deepagent_middleware = [TodoListMiddleware(), FilesystemMiddleware(backend=FilesystemBackend())]
 
+RECURSION_LIMIT = 100
+
 agent = create_agent(
     model=model_agent,
     tools=c64_agent_tools,
@@ -101,7 +103,7 @@ agent = create_agent(
     state_schema=VibeC64AgentState,    
     middleware=deepagent_middleware,
     system_prompt=vibec64_agent_instructions + path_instructions,
-)
+).with_config({"recursion_limit": 100})
 
 
 welcome_message = Markdown(f"""
@@ -128,7 +130,9 @@ I can help you:
 console.print(Panel(welcome_message, border_style="blue", padding=(1, 2)))
 game_create_task = Prompt.ask("Enter the [bold]game creation task[/bold]")
 
-agent_config = {"configurable": {"thread_id": str(uuid.uuid4())}}
+thread_id = str(uuid.uuid4())
+
+agent_config = {"configurable": {"thread_id": thread_id}, "recursion_limit": RECURSION_LIMIT}
 
 async def run_agent_game_creation():
     async for chunk in agent.astream(  
@@ -137,7 +141,7 @@ async def run_agent_game_creation():
         config = agent_config,
     ): 
         if "messages" in chunk:
-            format_message(chunk["messages"][-1])     
-
+            format_message(chunk["messages"][-1])   
+    
 if __name__ == "__main__":
     asyncio.run(run_agent_game_creation())

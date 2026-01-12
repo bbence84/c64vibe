@@ -148,7 +148,7 @@ async def initialize_agent():
         FilesystemMiddleware(backend=FilesystemBackend()),
         ChainlitMiddlewareTracer()
     ]
-
+    
     # Create the agent
     agent = create_agent(
         model=model_agent,
@@ -158,7 +158,7 @@ async def initialize_agent():
         state_schema=VibeC64AgentState,
         system_prompt=vibec64_agent_instructions + path_instructions,
     ).with_config({"recursion_limit": RECURSION_LIMIT})
-    
+
     # Store agent in session
     cl.user_session.set("agent", agent)
     cl.user_session.set("thread_id", str(uuid.uuid4()))
@@ -289,7 +289,7 @@ async def on_message(message: cl.Message):
     additional_messages = get_messages_from_attachments(message)
 
     if additional_messages != []:
-        #logger.debug("Additional messages from attachments: %s", additional_messages)
+        logger.info(f"Additional messages from attachments found: {len(additional_messages)}")
         agent_messages = [{"role": "user", "content": [{"type": "text", "text": message.content}, *additional_messages]}] 
     else:
         agent_messages = [{"role": "user", "content": message.content}]           
@@ -299,7 +299,7 @@ async def on_message(message: cl.Message):
 
     async for stream_mode, data  in agent.astream(
          config=agent_config,
-         stream_mode=["messages", "updates"],  
+         stream_mode=["messages"],  # stream_mode=["messages", "updates"],  
          input={"messages": agent_messages},
     ):
         if stream_mode == "messages":
