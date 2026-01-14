@@ -3,14 +3,20 @@ import logging
 from langchain.chat_models import init_chat_model
 from langchain_core.rate_limiters import InMemoryRateLimiter
 
-# # Temporary(?) hack for error 500 from the Google GenAI API
-# rate_limiter = InMemoryRateLimiter(
-#     requests_per_second=1,  
-#     check_every_n_seconds=0.1, 
-#     max_bucket_size=10,  
-# )
-
 logger = logging.getLogger(__name__)
+
+RPM_LIMIT = os.getenv("RPM_LIMIT")
+if RPM_LIMIT:
+    logger.info(f"Setting rate limiter with RPM_LIMIT: {RPM_LIMIT}")
+    rate_limiter = InMemoryRateLimiter(
+        requests_per_second= int(RPM_LIMIT)/60 if RPM_LIMIT else 10000,
+        check_every_n_seconds=0.1, 
+        max_bucket_size=10,  
+    )
+else:
+    rate_limiter = None
+
+
 
 class LLMAccessProvider:
     def __init__(self):
@@ -71,14 +77,14 @@ class LLMAccessProvider:
                 return init_chat_model(streaming=streaming, model=self.model_name, api_key=self.api_key, model_provider="openai") 
             elif self.model_provider == "google_genai":
                 if self.model_name == "gemini-3-flash-preview":
-                    thinking_level = "minimal"
+                    thinking_level = "high"
                 else:
                     thinking_level = "low"
 
                 return init_chat_model(
                     streaming=streaming, model=self.model_name, api_key=self.api_key, 
-                    #rate_limiter=rate_limiter,
-                    model_provider="google_genai", include_thoughts=False, thinking_level=thinking_level)
+                    rate_limiter=rate_limiter,
+                    model_provider="google_genai", include_thoughts=False, thinking_level=thinking_level).with_retry(stop_after_attempt=5)
             elif self.model_provider == "anthropic":
                 return init_chat_model(streaming=streaming, model=self.model_name, api_key=self.api_key, model_provider="anthropic")
             else:

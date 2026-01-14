@@ -15,9 +15,10 @@
   - ✓ Better welcome message with hardware status and readme.md for the UI
   - ✓ Don't save the generated prg and bas files on the server, only offer for download
   - ✓ Open generated game in an online C64 emulator directly from the UI
-- HIGH_PRIO: Analyze the game creation request and indicate if the game requested might be too complex for BASIC
+- Assembly support?
+- ✓ Analyze the game creation request and indicate if the game requested might be too complex for BASIC
 - HIGH_PRIO: Catch HTTP errors and report back to the user, check usual errors, too many tokens, limit reached
-- Capture device support for screen capture tool redo
+- ✓ Capture device support for screen capture tool redo
 - Store API keys in local storage or session storage 
 - Provide examples for fancy texts for games
 - Human in the loop for approval before creating the source code

@@ -4,7 +4,7 @@ The direct keyboard access to the physical C64 is a fork of the original reposit
 
 ## Original schematic
 
-![Schematic](schemantic.png)
+![Schematic](schematic.png)
 
 ## Required adjustments for the Arduino Uno
 

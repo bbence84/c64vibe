@@ -121,66 +121,8 @@ if __name__ == "__main__":
 
     try:
         hardware_access = C64HardwareAccess(device_port="COM3", baud_rate=19200, debug=False)
-
         #hardware_access.tap_key("Return")
         #hardware_access.type_text("HKS")
-        # hardware_access.tap_key("Return") 
-        #hardware_access.restart_c64()
-        # hardware_access.tap_key("Return")
-        # hardware_access.type_text("===$$$...   ... ZZZ")
-        # hardware_access.tap_key("Return")
-                
-        #load_and_run_program(f"source_code/guess_hun.bas", run_after_load=True)
-        #hardware_access.restart_c64()
-        #time.sleep(4)  # Wait for C64 to restart
-        time.sleep(5)
-        # hardware_access.tap_key("Return")
-        # hardware_access.restart_c64()
-        hardware_access.load_and_run_program("test.bas", run_after_load=True)
-        hardware_access.quit_from_program()
-
-        # hardware_access.type_text("9200 DATA 255,255,255,255,255,255,255,255,255,99,0,0")
-        #hardware_access.load_and_run_program(f"../resources/examples/invaders.bas", run_after_load=True)
-        #hardware_access.type_text("LIST 8015-8052")
-        #hardware_access.tap_key("Return")
-
-        # # #hardware_access.list_program()
-        # for _ in range(200):
-        #     #hardware_access.type_text(f"""= ! % / ' # & ( ) , - . ; :""")
-        #     hardware_access.tap_key("Return")
-        #     hardware_access.type_text(f"""! % ;== NN 123 4 5""")
-        #     #hardware_access.tap_key("=")
-        #     #hardware_access.tap_key("Return")
-        #     time.sleep(0.5)
-
-        #hardware_access.type_text("N")
-        #hardware_access.tap_key("Return")
-        # hardware_access.type_text("59")
-        # hardware_access.tap_key("Return")
-
-        #hardware_access.tap_key("+")
-
-        #hardware_access.tap_key("Return")
-        # List lines from 10 to 500
-        # hardware_access.type_text("LIST 100-1000")
-        # hardware_access.tap_key("Return")
-
-        #BCM
-        # #hardware_access.type_text("RUN")
-        # # repeat 100 times to ensure all input is processed
-        # for _ in range(100):
-        #     #hardware_access.type_text("A")
-        #     hardware_access.tap_key("Return")
-        #     # Give some time for the program to start
-        #     time.sleep(0.5)
-
-        #hardware_access.type_text("2010 REM AEIOU 12345678(!!!) POKE ((Y*40)+X) CHR$(32)")
-        #hardware_access.tap_key("Return")
-
-        # hardware_access.type_text("LIST")
-        # hardware_access.tap_key("Return")
-        # hardware_access.type_text("RUN")
-        # hardware_access.tap_key("Return")
         
     except Exception as e:
         print(f"An error occurred: {e}")

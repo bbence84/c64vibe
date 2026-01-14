@@ -37,6 +37,21 @@ VibeC64 is an AI agent specialized in creating games for the Commodore 64 comput
 3. Get API key at [openrouter.ai/settings/keys](https://openrouter.ai/settings/keys)
 4. Provides access to multiple AI models with single key
 
+### Google AI Studio (free but very limited, might not even work)
+
+There's a way to get a free API key to use Google Gemini Flash 3.0, if you don't mind it being a bit slow and getting rate limit and out of quota errors.
+
+1. Login to [AI Studio](https://aistudio.google.com/) and create a new project: https://aistudio.google.com/projects
+2. Go to https://aistudio.google.com/app/api-keys 
+3. On the top-right corner, click the Create API key button
+4. Select the project you created earlier and click cropy
+5. Copy the API keys and use it in the Settings popup (or change the .env file)
+6. If you are running this agent locally, set the .env variable RPM_LIMIT to 3 
+
+You can also check the following page for a detailed description on getting the API key in AI Studio: [How to generate a Gemini API key](https://wedevs.com/blog/510096/how-to-generate-gemini-api-key/)
+
+Again, this is very limited, it might get you 1-2 games per day at most. But you can enable billing for the Project you created, and then it will work reliably.
+
 ### Direct Provider Keys
 - **Google**: [aistudio.google.com/app/api-keys](https://aistudio.google.com/app/api-keys)
 - **Anthropic**: [console.anthropic.com](https://console.anthropic.com)
@@ -58,7 +73,7 @@ VibeC64 is an AI agent specialized in creating games for the Commodore 64 comput
 
 1. Clone the repository:
 ```bash
-git clone <repository-url>
+git clone https://github.com/bbence84/VibeC64.git
 cd VibeC64
 ```
 
@@ -77,6 +92,8 @@ Edit `.env` and add your AI provider credentials:
 AI_MODEL_PROVIDER=google_genai
 AI_MODEL_NAME=gemini-3-flash-preview
 API_KEY=your_api_key_here
+# Optional: Set RPM_LIMIT to 5 if your are using a free-tier API key via Google AI Studio
+# RPM_LIMIT=5
 
 # Optional: For LangSmith tracing
 LANGCHAIN_TRACING_V2=false

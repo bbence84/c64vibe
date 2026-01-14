@@ -147,6 +147,9 @@ class CodingTools:
                 63999 REM GITHUB.COM/BBENCE84/VIBEC64
                 """    
             
+        # Further possible instructions:
+        # - Add an intro screen that explains the controls and how to play the game.
+            
         code_create_instructions = f"""
             {code_create_instructions_1}
             Ensure the code adheres to C64 BASIC V2.0 syntax and conventions.
@@ -161,7 +164,8 @@ class CodingTools:
             - No special characters outside of those supported by C64 BASIC V2.0, only use PETSCII characters.
             - Don't use accented characters, even for non-English programs.
             - Don't use pseudo control commands like {{CLR}} {{WHT}} {{DOWN}} {{DOWN}}, use CHR$() commands instead.
-
+            - Prefer keyboard control over joystick control for user inputs. 
+            
             In case the game contains advanced graphics or requires more perforamnce, try to use memory locations and PEEK/POKE commands to set graphics modes, colors, etc.
 
             {'Example BASIC V2.0 programs for reference, to follow C64 BASIC V2.0 syntax:' if load_examples else ""}

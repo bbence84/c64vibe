@@ -49,15 +49,6 @@ RECURSION_LIMIT = 100
 
 set_model_settings_alert = '<span style="color:red">⚠️**Set your AI model and API key in the Settings panel (⚙️ icon in the chat input area below) before proceeding.**⚠️</span>'
 
-# @cl.oauth_callback
-# def oauth_callback(
-#   provider_id: str,
-#   token: str,
-#   raw_user_data: Dict[str, str],
-#   default_user: cl.User,
-# ) -> Optional[cl.User]:
-#   return default_user
-
 @cl.on_chat_start
 async def on_chat_start():
     llm_access_provider = LLMAccessProvider()
