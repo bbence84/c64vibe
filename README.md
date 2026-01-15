@@ -5,6 +5,7 @@
 VibeC64 is an AI agent specialized in creating games for the Commodore 64 computer using BASIC V2.0. It leverages modern AI models (LLMs) to design, code, test, and optionally run C64 programs on real hardware or emulators.
 
 YouTube video:
+
 [![](video_thumbnail.jpg)](https://youtu.be/om4IG5tILzg)
 
 ## ✨ Features
