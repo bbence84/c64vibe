@@ -20,6 +20,8 @@ from typing import Dict, Optional
 
 from chainlit.input_widget import Select, Switch, TextInput
 
+XCBASIC3_MODE = True
+
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -79,6 +81,9 @@ async def initialize_agent():
 
     # Initialize tool classes
     coding_tools = CodingTools(llm_access=llm_access_provider, cl=cl, hw_access_tools=hw_access_tools)
+    coding_tools.set_xcbasic3_mode(XCBASIC3_MODE)
+    cl.user_session.set("coding_tools", coding_tools)
+    
     game_design_tools = GameDesignTools(llm_access=llm_access_provider)
 
     model_agent = llm_access_provider.get_llm_model()
@@ -101,6 +106,14 @@ async def initialize_agent():
     else: 
         testing_instructions = ""
         
+    if XCBASIC3_MODE:
+        language_specific_instructions = f"""
+        The programs will be created in XC=BASIC 3 language mode. Ensure that the generated code is fully compatible with XC=BASIC 3 syntax and features.
+        """
+    else:
+        language_specific_instructions = f"""
+        The programs will be created in standard Commodore 64 BASIC 2.0 language mode. Ensure that the generated code is fully compatible with standard C64 BASIC syntax and features."""
+
     
     vibec64_agent_instructions = f"""
     You are VibeC64, an AI Agent specialized in creating games for the Commodore 64 computer.
@@ -108,7 +121,9 @@ async def initialize_agent():
     When given a user request, first determine if it involves creating or modifying a C64 program source code.
 
     Right at the beginning of the game creation or modification process, don't start using the tools right away, but emit a short statement that the process has been started and mention the initial steps you will take. Don't use Chinese though fragments.
-
+    
+    {language_specific_instructions}
+    
     Tool use instructions:
     - If code creation or modification is needed, first use the DesignGamePlan tool to create a detailed game design plan 
     - Use the CreateUpdateC64ProgramCode tool to generate syntactically correct code based on the design plan created by DesignGamePlan. Don't specify code in the description, only the design plan.
@@ -239,7 +254,7 @@ async def init_settings():
                 id="APIKey",
                 label="API Key",
                 placeholder="Enter your API key here"),
-
+            Switch(id="XCBasic3", label="XC=BASIC 3 Mode (Experimental)", initial=XCBASIC3_MODE),
         ]).send()
     return settings
 
@@ -346,11 +361,17 @@ async def change_agent_settings(settings):
     llm_model = settings["LLMSelector"]
     api_key = settings["APIKey"]
     use_openrouter = settings["OpenRouter"]
+    XCBASIC3_MODE = settings["XCBasic3"]
+
 
     llm_access_provider = cl.user_session.get("llm_access_provider")
 
-    if llm_access_provider and llm_model and api_key != "":
+    coding_tools = cl.user_session.get("coding_tools")
+    if coding_tools:
+        coding_tools.set_xcbasic3_mode(XCBASIC3_MODE)
 
+    if llm_access_provider and llm_model != "" and api_key != "" and llm_model is not None and api_key is not None:
+        logging.info(f"Changing AI model to {llm_model} using OpenRouter: {use_openrouter}")
         set_llm_success = llm_access_provider.set_llm_model(model_name=llm_model, api_key=api_key, use_openrouter=use_openrouter)
         if not set_llm_success:
 

@@ -155,8 +155,8 @@ VibeC64/
 │   └── formatting.py       # Output formatting utilities
 │
 ├── resources/              # Resource files
-│   └── examples_c64basic/           # Example C64 BASIC programs (for the AI agent to learn from)
-│   └── examples_xcbasic3/           # Example C64 XC=BASIC programs (for the AI agent to learn from)
+│   └── c64basic/           # Example C64 BASIC programs (for the AI agent to learn from)
+│   └── xcbasic3/           # Example C64 XC=BASIC programs (for the AI agent to learn from)
 │
 ├── output/                 # Generated programs output directory
 │

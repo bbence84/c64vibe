@@ -18,12 +18,45 @@ from chainlit.utils import utc_now
 LOAD_EXAMPLE_PROGRAMS = True
 EXPERIMENTAL_XCBASIC3_MODE = False
 
+C64_BASIC_RULES = """
+C64 BASIC V2.0 has the following rules:
+- Maximum 80 characters per line, split into 2 lines (40 characters each)
+- Line numbers must be between 1 and 63999
+- Line numbers must be in increments of 10
+- Only use commands and functions available in C64 BASIC V2.0
+- No lowercase letters, only uppercase
+- No special characters outside of those supported by C64 BASIC V2.0, only use PETSCII characters.
+- Don't use accented characters, even for non-English programs.
+- Don't use pseudo control commands like {CLR} {WHT} {DOWN} {DOWN}, use CHR$() commands instead.
+- Prefer keyboard control over joystick control for user inputs.
+"""
+
+XCBASIC_RULES = """
+XC=BASIC has the following rules:
+- In order to have proper text display, add a PRINT CHR$($0e) at the beginning of the program.
+- Only use commands and functions available in XC=BASIC
+- Don't use accented characters, even for non-English programs.
+- Prefer keyboard control over joystick control for user inputs. 
+- Constants can only be a numeric literal
+- Use DIM to declare variables, no need for sigils like $ or %, explicitly declare variable types with DIM and the types (AS ...)
+- Don't use $ at the end of string variables or % at the end of integer variables.
+- In XC=BASIC, don't use line numbers.
+- Don't use inline CALL, i.e. IF CALL check_win() THEN ... , use a variable to store the result of the CALL and use that variable in the IF condition.
+- XC=BASIC has NO ELSEIF statement, only ELSE after IF ... THEN ... ENDIF. Don't use ELSEIF, you can also use SELECT CASE ... END SELECT for multiple conditions.
+- Use proper indentation for better readability.
+- Don't use empty PRINT statements, i.e. PRINT without any arguments.
+"""
+
 class CodingTools:
     def __init__(self, llm_access, cl = None, hw_access_tools = None):
         self.model_coder = llm_access.get_llm_model(create_new=True, streaming=False)
         self.llm_access = llm_access
         self.cl = cl
         self.hw_access_tools = hw_access_tools
+        self.xcbasic3_mode = EXPERIMENTAL_XCBASIC3_MODE
+
+    def set_xcbasic3_mode(self, enabled: bool):
+        self.xcbasic3_mode = enabled
 
     def tools(self):
 
@@ -38,23 +71,27 @@ class CodingTools:
                 "messages": [ToolMessage(content=f"Stored provided source code in the agent's external memory.", tool_call_id=runtime.tool_call_id)]
             })
 
-        @tool("SyntaxChecker", description="Checks the syntax of C64 program source code. The source code is taken from the agent's external memory. The syntax check results are stored back in the agent's external memory.")
+        @tool("SyntaxChecker", description="Checks the syntax of C64 program source code (either C64 BASIC or XC=BASIC). The source code is taken from the agent's external memory. The syntax check results are stored back in the agent's external memory.")
         def check_syntax(runtime: ToolRuntime[None, VibeC64AgentState], 
                           llm_based: Annotated[bool, "The syntax check is performed by an LLM"] = True) -> str:
             return self._check_syntax_c64_basic(runtime, llm_based)
                 
-        @tool("CreateUpdateC64ProgramCode", description="Generates or updates C64 program source code based on the FULL game design description or change instructions and persists it in the agent's external memory")
+        @tool("CreateUpdateC64ProgramCode", description="Generates or updates C64 program source code (either C64 BASIC or XC=BASIC) based on the FULL game design description or change instructions and persists it in the agent's external memory")
         def create_source_code(
             runtime: ToolRuntime[None, VibeC64AgentState],
             game_design_description: Annotated[str, "Game design description of the program to create, including the FULL game design. Do not include code in the description, only the FULL design plan created earlier, containing all details."],
             change_instructions: Annotated[str, "Optional instructions to modify existing code. If provided, modify the existing code instead of creating new code."] = "",
             ) -> Command:
+            if self.xcbasic3_mode:
+                logging.info("Creating/updating C64 program code in XC=BASIC mode.")
+            else:
+                logging.info("Creating/updating C64 program code in C64 BASIC V2.0 mode.")
             return self._create_game_source_code_c64(runtime, game_design_description, change_instructions)
 
-        @tool("FixSyntaxErrors", description="Fixes syntax errors in C64 program source code stored in the agent's external memory or based on user-reported errors")
+        @tool("FixSyntaxErrors", description="Fixes syntax errors in C64 program source code (either C64 BASIC or XC=BASIC) stored in the agent's external memory or based on user-reported errors (if provided) and updates the source code in the agent's external memory.")
         def fix_syntax_errors(
                 runtime: ToolRuntime[None, VibeC64AgentState],
-                user_reported_errors: Annotated[str, "Optional additional information about the syntax errors reported by the user."] = "",
+                user_reported_errors: Annotated[str, "Optional additional information about the syntax errors reported by the user. If only the result of the automatic syntax check is available, leave this empty, don't include any user input or instructions on how to fix the issue."] = "",
                 ) -> Command:
             return self._fix_syntax_errors(runtime, user_reported_errors)
         
@@ -77,13 +114,14 @@ class CodingTools:
     def _check_syntax_c64_basic(self, runtime: ToolRuntime[None, VibeC64AgentState],
                     llm_based: Annotated[bool, "The syntax check is performed by an LLM"] = True) -> str:
         source_code = runtime.state.get("current_source_code", "")
-
-        if EXPERIMENTAL_XCBASIC3_MODE:
+        
+        if self.xcbasic3_mode:
             # Convert to PRG using xcbasic3 to check for syntax errors
             _, _, conversion_output = agent_utils.convert_c64_bas_to_prg(bas_code=source_code, write_to_file=False, xcbasic3_mode=True)
             if "Error in source code:" in conversion_output:
                 syntax_check_errors = conversion_output.replace("Error in source code:", "").strip()
-                syntax_check_results = "Found syntax errors."
+                syntax_check_results = "Found syntax errors: " + syntax_check_errors
+                logging.info(f"XC=BASIC syntax check found errors: {syntax_check_errors}")
             else:
                 syntax_check_errors = "No syntax errors found."
                 syntax_check_results = "No syntax errors found."
@@ -107,7 +145,7 @@ class CodingTools:
                 if not syntax_check_output.has_syntax_errors:
                     syntax_check_results = "No syntax errors found."
                 else:
-                    syntax_check_results = "Found syntax errors."
+                    syntax_check_results = "Found syntax errors: " + syntax_check_errors
                     
             else:
                 syntax_check_errors = c64_syntax_checker.check_source(source_code, return_structured=False, print_errors=False, return_warnings=False)    
@@ -125,7 +163,7 @@ class CodingTools:
         ) -> Command:
 
         load_examples = LOAD_EXAMPLE_PROGRAMS
-        if EXPERIMENTAL_XCBASIC3_MODE:
+        if self.xcbasic3_mode:
             used_language = "XC=BASIC"
         else:
             used_language = "C64 BASIC V2.0"
@@ -157,7 +195,7 @@ class CodingTools:
                 
                 The game can be long and complex, so make sure to include all necessary parts to make it fully functional."""
             
-            if EXPERIMENTAL_XCBASIC3_MODE:
+            if self.xcbasic3_mode:
                 code_create_instructions_2 += """
                 Always add the following lines at the END of the program to state that the program has been created by the VibeC64 AI agent:
                 REM ==============================
@@ -175,35 +213,26 @@ class CodingTools:
         # Further possible instructions:
         # - Add an intro screen that explains the controls and how to play the game.
         
-        if EXPERIMENTAL_XCBASIC3_MODE == False:
+        if self.xcbasic3_mode == False:
             code_create_instructions = f"""
                 {code_create_instructions_1}
                 Ensure the code adheres to C64 BASIC V2.0 syntax and conventions.
                 Make sure line numbers are included and correctly ordered, and there's no duplicate line numbers.
                 Provide only the source code as output, nothing else.
-                C64 BASIC V2.0 has the following rules:
-                - Maximum 80 characters per line, split into 2 lines (40 characters each)
-                - Line numbers must be between 1 and 63999
-                - Line numbers must be in increments of 10
-                - Only use commands and functions available in C64 BASIC V2.0
-                - No lowercase letters, only uppercase
-                - No special characters outside of those supported by C64 BASIC V2.0, only use PETSCII characters.
-                - Don't use accented characters, even for non-English programs.
-                - Don't use pseudo control commands like {{CLR}} {{WHT}} {{DOWN}} {{DOWN}}, use CHR$() commands instead.
-                - Prefer keyboard control over joystick control for user inputs. 
+                {C64_BASIC_RULES}
                 
                 In case the game contains advanced graphics or requires more perforamnce, try to use memory locations and PEEK/POKE commands to set graphics modes, colors, etc.
 
                 {'Example BASIC V2.0 programs for reference, to follow C64 BASIC V2.0 syntax:' if load_examples else ""}
-                {agent_utils.read_example_programs(num_examples=10, folder="resources/examples_c64basic") if load_examples else ""}
+                {agent_utils.read_example_programs(num_examples=10, folder="resources/c64basic") if load_examples else ""}
                 
                 {code_create_instructions_2}
                 Don't use Markdown formatting, code blocks, or any additional explanations, just the pure source code text.
                 """
         else:   
-            # Read resources/examples_xcbasic3/docs_xcbasic3/reference.md
+            # Read resources/xcbasic3/docs_xcbasic3/reference.md
             programming_reference = ""
-            with open("resources/examples_xcbasic3/docs_xcbasic3/reference.md", "r") as f:
+            with open("resources/xcbasic3/docs_xcbasic3/reference.md", "r") as f:
                 programming_reference = f.read()
             programming_reference = f""" Here is the XC=BASIC programming reference for your help: \n
             {programming_reference}"""        
@@ -211,16 +240,11 @@ class CodingTools:
                 {code_create_instructions_1}
                 Ensure the code adheres to XC=BASIC syntax and conventions.
                 Provide only the source code as output, nothing else.
-                XC=BASIC has the following rules:
-                - Only use commands and functions available in XC=BASIC
-                - Don't use accented characters, even for non-English programs.
-                - Prefer keyboard control over joystick control for user inputs. 
-                - Constants can only be a numeric literal
-
+                {XCBASIC_RULES}
                 {programming_reference}
                 
                 {'Example XC=BASIC programs for reference, to follow XC=BASIC syntax:' if load_examples else ""}
-                {agent_utils.read_example_programs(num_examples=10, folder="resources/examples_xcbasic3") if load_examples else ""}
+                {agent_utils.read_example_programs(num_examples=10, folder="resources/xcbasic3") if load_examples else ""}
                 
                 {code_create_instructions_2}
                 Don't use Markdown formatting, code blocks, or any additional explanations, just the pure source code text.
@@ -250,29 +274,64 @@ class CodingTools:
         syntax_errors = runtime.state.get("syntax_errors", "")
         syntax_errors += f"\nUser-reported errors: {user_reported_errors}" if user_reported_errors != "" else ""
 
-        if EXPERIMENTAL_XCBASIC3_MODE:
+        if self.xcbasic3_mode:
             used_language = "XC=BASIC"
-            programming_reference = ""
-            with open("resources/examples_xcbasic3/docs_xcbasic3/reference.md", "r") as f:
+            language_rules = XCBASIC_RULES
+            with open("resources/xcbasic3/docs_xcbasic3/reference.md", "r") as f:
                 programming_reference = f.read()
-            programming_reference = f""" Here is the XC=BASIC programming reference for your help: \n
-            {programming_reference}"""       
+            additional_hints = f""" Here is the XC=BASIC programming reference for your help: \n
+            {programming_reference}"""   
+            line_numbering_hint = "Line numbers have been added for syntax checking purposes, but remember that XC=BASIC does not use line numbers. Remove them from the syntax corrected code."    
+            # Check if source_code contains line numbers, if not add them temporarily for syntax checking. Line numbers should be exactly as the actual line number, no 10 increments, etc.
+            if not any(line.lstrip().split(' ')[0].isdigit() for line in source_code.splitlines()):
+                temp_source_code_lines = []
+                for idx, line in enumerate(source_code.splitlines(), start=1):
+                    temp_source_code_lines.append(f"{idx}: {line}")
+                source_code = "\n".join(temp_source_code_lines)
         else:
             used_language = "C64 BASIC V2.0"
-            programming_reference = ''
+            language_rules = C64_BASIC_RULES
+            additional_hints = ''
+            line_numbering_hint = ''
 
         fix_instructions = f""" The following C64 {used_language} source code contains syntax errors:
+            ```basic
             {source_code}
+            ```
+
             Syntax errors identified:
             {syntax_errors}
+
+            Apply the following {used_language} coding rules when fixing the syntax errors:
+            {language_rules}
+
+            {line_numbering_hint}
+
             Provide only the corrected source code as output.
             Don't use Markdown formatting, code blocks, or any additional explanations, just the pure source code text.
-            Again, the programming language is {used_language}.
+            Again, the programming language is {used_language}, apply the rules of this language when fixing the syntax errors.
 
-            {programming_reference}
+            {additional_hints}
             """
+
         llm_coder_response = self.model_coder.invoke([{"role": "user", "content": fix_instructions}])
         fixed_source_code = agent_utils.get_message_content(llm_coder_response.content)
+
+        if self.xcbasic3_mode:
+            # Remove line numbers if any
+            fixed_source_code_lines = []
+            for line in fixed_source_code.splitlines():
+                if ':' in line:
+                    parts = line.split(':', 1)
+                    if parts[0].strip().isdigit():
+                        fixed_source_code_lines.append(parts[1].lstrip())
+                        logging.info(f"Removed line number {parts[0].strip()} from line.")
+                    else:
+                        fixed_source_code_lines.append(line)
+                
+                else:
+                    fixed_source_code_lines.append(line)
+            fixed_source_code = "\n".join(fixed_source_code_lines)
         
         return Command(update={
             "current_source_code": fixed_source_code,
@@ -290,14 +349,14 @@ class CodingTools:
             with open(temp_bas_path, "w") as temp_bas_file:
                 temp_bas_file.write(source_code)
 
-            temp_prg_path, _, _ = agent_utils.convert_c64_bas_to_prg(bas_code=source_code, write_to_file=True, xcbasic3_mode=EXPERIMENTAL_XCBASIC3_MODE)
+            temp_prg_path, _, _ = agent_utils.convert_c64_bas_to_prg(bas_code=source_code, write_to_file=True, xcbasic3_mode=self.xcbasic3_mode)
 
             return f"The source code has been saved to {temp_bas_path} and converted to PRG file at {temp_prg_path}."
 
         else:
 
             # Convert the source code to a PRG file
-            temp_prg_path, prg_data, _ = agent_utils.convert_c64_bas_to_prg(bas_code=source_code, write_to_file=False, xcbasic3_mode=EXPERIMENTAL_XCBASIC3_MODE)
+            temp_prg_path, prg_data, _ = agent_utils.convert_c64_bas_to_prg(bas_code=source_code, write_to_file=False, xcbasic3_mode=self.xcbasic3_mode)
             prg_base64 = base64.b64encode(prg_data).decode()
             props = { "button_label": "🎮 Launch Game in Online C64 Emulator",
                     "target_origin": "http://ty64.krissz.hu",

@@ -16,6 +16,8 @@ from typing import cast
 
 logger = logging.getLogger(__name__)
 
+HIDE_TODO_TOOL_IN_CHAT_UI = True
+
 class ChainlitMiddlewareTracer(AgentMiddleware if AgentMiddleware != object else object):
     """
     Middleware tracer for LangChain v1.x agents integrating with Chainlit.
@@ -61,6 +63,7 @@ class ChainlitMiddlewareTracer(AgentMiddleware if AgentMiddleware != object else
         if tool_name == "glob": tool_name = "FindFiles"
         if tool_name == "ls": tool_name = "GetFileList"
 
+
         # Create a step for this tool call
 
         if tool_name != "ConvertCodeToPRG":
@@ -78,7 +81,8 @@ class ChainlitMiddlewareTracer(AgentMiddleware if AgentMiddleware != object else
                 step.input = str(tool_input)
                 step.show_input = True
 
-            await step.send()
+            if not (HIDE_TODO_TOOL_IN_CHAT_UI and tool_name == "WriteTodos"):
+                await step.send()
 
         # Execute the tool
         try:
@@ -98,17 +102,22 @@ class ChainlitMiddlewareTracer(AgentMiddleware if AgentMiddleware != object else
                 logger.error(f"Error formatting tool output for Chainlit: {e}, tool_name: {tool_name}, result: {result}")
                 step.output = str(result)
 
-            step.end = utc_now()
-            await step.update()
+            if not (HIDE_TODO_TOOL_IN_CHAT_UI and tool_name == "WriteTodos"):
+                step.end = utc_now()
+                await step.update()
+            else:
+                await step.remove()
 
             return result
 
         except Exception as e:
             # Mark step as error
-            step.is_error = True
-            step.output = str(e)
-            step.end = utc_now()
-            await step.update()
+            if not (HIDE_TODO_TOOL_IN_CHAT_UI and tool_name == "WriteTodos"):
+                step.is_error = True
+                step.output = str(e)
+                step.end = utc_now()
+                await step.update()
+
             raise
     
     async def _format_output(self, tool_name: str, tool_output: Any, step: cl.Step) -> tuple[dict | str, str | None]:

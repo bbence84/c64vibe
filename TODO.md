@@ -15,8 +15,7 @@
   - ✓ Better welcome message with hardware status and readme.md for the UI
   - ✓ Don't save the generated prg and bas files on the server, only offer for download
   - ✓ Open generated game in an online C64 emulator directly from the UI
-- Assembly support?
-  - Convert BASIC to Assembly?
+- Assembly support? Or maybe XC=BASIC3 is sufficient
 - Art pipeline:
   - Ability to import SpriteMate files and display them
   - Invoke nanobanana for image generation, convert it to sprite
