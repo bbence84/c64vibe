@@ -56,7 +56,7 @@ class HWAccessTools:
 
     def tools(self):
 
-        @tool("RunC64Program", description="Loads and runs the C64 BASIC V2.0 program from the agent's external memory on the connected Commodore 64 hardware")
+        @tool("RunC64Program", description="Loads and runs the C64 program from the agent's external memory on the connected Commodore 64 hardware")
         def run_c64_program(runtime: ToolRuntime[None, VibeC64AgentState]) -> str:
             source_code = runtime.state.get("current_source_code", "")
             if self.is_c64u_api_connected():
@@ -72,31 +72,15 @@ class HWAccessTools:
             tools.append(run_c64_program)           
             
         return tools
-    
-    # def _download_c64_program(self, game_name: str, runtime: ToolRuntime[None, VibeC64AgentState]) -> str:
-    #     # Write the source code to a temporary BAS file
-    #     source_code = runtime.state.get("current_source_code", "")
-    #     temp_bas_path = os.path.join("output", f"{game_name}.bas")
-    #     with open(temp_bas_path, "w") as temp_bas_file:
-    #         temp_bas_file.write(source_code)
         
-    #     # Convert the source code to a PRG file
-    #     temp_prg_path = agent_utils.convert_c64_bas_to_prg(temp_bas_path)
-    #     return temp_prg_path, temp_bas_file
-    
     def run_c64_program_c64u_api(self, source_code: str) -> str:
         
 
         if not self.c64u_api_connected:
             return "Error: C64U API hardware not connected. Cannot run program on Commodore 64."
-
-        # Write / overwrite the source code to a temporary PRG file
-        temp_bas_path = os.path.join("output", "temp_program.bas")
-        with open(temp_bas_path, "w") as temp_bas_file:
-            temp_bas_file.write(source_code)
         
         # Convert the source code to a PRG file
-        _, prg_data = agent_utils.convert_c64_bas_to_prg(bas_file_path=temp_bas_path, write_to_file=True)
+        _, prg_data, _ = agent_utils.convert_c64_bas_to_prg(bas_code=source_code, write_to_file=True)
 
         async def run_prg_via_api():
             async with C64UApiClient(self.c64u_api_base) as api:
@@ -116,14 +100,9 @@ class HWAccessTools:
 
         if not self.kungfuflash_connected:
             return "Error: KungFuFlash hardware not connected. Cannot run program on Commodore 64."
-
-        # Write / overwrite the source code to a temporary PRG file
-        temp_bas_path = os.path.join("output", "temp_program.bas")
-        with open(temp_bas_path, "w") as temp_bas_file:
-            temp_bas_file.write(source_code)
         
         # Convert the source code to a PRG file
-        temp_prg_path, _ = agent_utils.convert_c64_bas_to_prg(bas_file_path=temp_bas_path, write_to_file=True)
+        temp_prg_path, _, _ = agent_utils.convert_c64_bas_to_prg(bas_code=source_code, write_to_file=True)
 
         with self.kungfuflash as kff:
             kff.return_to_menu(reconnect=True)

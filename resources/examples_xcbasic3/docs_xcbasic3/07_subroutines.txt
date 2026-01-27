@@ -1,0 +1,177 @@
+====== Subroutines ======
+
+While you can use the [[GOSUB]] command in pair with [[RETURN]] to call parts of code as subroutines, the more sophisticated way of implementing subroutines is using the ''SUB ... END SUB'' block.
+
+===== Defining Subroutines =====
+
+Subroutines are named routines that accept zero or more arguments. The simplest syntax to define a subroutine is the following:
+
+  SUB <rountine_name> ([arg1 AS <type>, arg2 AS <type>, ...])
+    <statements>
+  END SUB
+
+It is worth noting that the argument list is optional. If you omit the arguments, you still must add the empty parentheses after the routine name, like so:
+
+  SUB <routine_name> ()
+    <statements>
+  END SUB
+
+===== Calling Subroutines =====
+
+You can use the [[CALL]] keyword to call a subroutine. It behaves similarly to [[GOSUB]] with an important difference: ''CALL'' can pass arguments to the subroutine. Consider the following example:
+
+  SUB greet (name$ AS STRING * 10)
+    PRINT "Hello, "; name$
+  END SUB
+  
+  CALL greet("Emily") ' will display: Hello, Emily
+  CALL greet("Mark") ' will display: Hello, Mark
+
+The ''CALL'' command will evaluate the argument list in the parentheses, pass all arguments to the subroutine and then instruct the computer to continue the program at the top of the subroutine.
+
+===== Exiting Subroutines =====
+
+The subroutine will be exited at the ''END SUB'' statement. If you want to exit a subroutine earlier, use the ''EXIT SUB'' command:
+
+  SUB test (a AS INT)
+    IF a < 0 THEN PRINT "positive number please" : EXIT SUB
+    PRINT SQR(a)
+  END SUB
+  CALL test(-1)
+===== Local and Global Variables =====
+
+Variables defined inside a subroutine are local variables, i. e. they are only accessible within that subroutine. Global variables (the ones defined outside subroutines) are visible from within all subroutines.
+
+  globalvar = 1
+  SUB test ()
+    PRINT globalvar : REM this is okay as globalvar is visible form here
+    localvar = 5
+  END SUB
+  CALL test()
+  PRINT localvar : REM ERROR: localvar is not defined in the global scope
+
+==== Shadowing ====
+
+A local variable may have the same name as a global variable. In such cases the local variable will be used inside the subroutine. This is know as a "shadow variable." Consider the following example:
+
+  a = 42
+  SUB test ()
+    a = 5
+    PRINT a
+  END SUB
+  CALL test() : REM will output 5
+  PRINT a : REM will output 42
+
+
+===== Static vs. Dynamic =====
+
+It is important to understand how arguments may be passed to a subroutine. XC=BASIC offers two methods:
+
+  * //Dynamic// arguments: the arguments are created dynamically in memory. Before the subroutine is called, a new area in memory - a //stack frame// - is allocated, and this area holds the passed arguments. The advantage of dynamic memory allocation is that it allows recursive subroutine calls, i. e. the subroutine can call itself without harming its data. However, there is a penalty: dynamic arguments operate much slower than static arguments.
+  * //Static// arguments: the arguments are stored in a pre-allocated memory area. When the subroutine is called, the arguments are simply copied to this area. This is much faster than dynamic frame allocation but it doesn't support recursion.
+
+The default method of passing arguments is //dynamic//. If you'd like to pass arguments statically, append the ''STATIC'' keyword to the subroutine definition:
+
+  SUB <subroutine_name> (arg AS <type>) STATIC
+
+<adm note>
+The ''STATIC'' keyword in a subroutine definition not only applies to the subroutine's arguments but to all its local variables as well.
+</adm>
+
+<adm warning>
+Always define your subroutines ''STATIC'' unless you intend to make recursive calls. The compiler will try to detect possible recursion and warn you about this in case you forget the ''STATIC'' keyword.
+</adm>
+
+==== Static Variables Inside Dynamic Subroutines ====
+
+You can mix static and dynamic behaviour using the ''STATIC'' keyword instead of ''DIM'' to mark local variables static when a subroutine is otherwise dynamic.
+
+  SUB test (arg AS INT)
+    DIM a AS INT : REM a is dynamic
+    STATIC b AS INT : REM b is static
+  END SUB
+
+<adm note>
+Static local variables' values are preserved between subroutine calls. Upon entering a subroutine, static local variables have the same value as when the subroutine last exited. They are not overwritten.
+</adm>
+
+If a subroutine is defined as ''STATIC'', all its local variables will be static, regardless of whether you use the ''DIM'' or ''STATIC'' keyword to define them:
+
+  SUB test (arg AS INT) STATIC
+    DIM a AS INT : REM a is static
+    STATIC b AS INT : REM b is also static
+  END SUB
+
+<adm warning>
+The stack frame that is allocated on each subroutine call must not be larger than 128 bytes. The compiler detects if a subroutine requires a larger stack frame, and emits a compile-time error in such cases. Therefore it is recommended to keep as many variables ''STATIC'' as possible.
+</adm>
+
+===== Overloading =====
+
+Subroutine overloading, commonly known as method overloading in object-oriented programming languages, refers to the ability to create multiple subroutines with the same name but different parameters. This feature allows a programmer to define different ways to call a subroutine based on the types and number of arguments passed.
+
+Overloaded subroutines have the same name but differ in the type, number, or both type and number of parameters.
+
+==== Compile-Time Polymorphism ====
+
+The appropriate subroutine to call is determined at compile-time based on the arguments provided in the call.
+
+Consider the following example:
+
+  SUB PrintMessage(msg AS STRING * 16)
+      PRINT msg
+  END SUB
+  
+  SUB PrintMessage(msg AS STRING * 16, num AS INT) OVERLOAD
+      PRINT msg; " "; num
+  END SUB
+  
+  CALL PrintMessage("Hello, XC=BASIC!")
+  CALL PrintMessage("The number is", 42)
+
+<adm warning>
+You must use the ''OVERLOAD'' keyword when defining the second and subsequent overloaded variations of a subroutine. This tells the compiler that the duplicate subroutine names are intentional overloads and not a programming mistake.
+</adm>
+
+<adm note>
+It is possible to overload the built-in XC=BASIC functions in your code, too.
+</adm>
+===== Forward Declaration =====
+
+A subroutine can not be called before it was defined. This often makes it hard to organize your code in a clean and readable way. You may want to put subroutines at the end of your code and that's a perfectly valid requirement.
+
+This is where forward declaration comes in handy. Forward declaration means that you declare a subroutine's all important properties (or the //header// of the subroutine) beforehand, and leave the actual code implementation for later. Consider the following example:
+
+  REM -- the top of the program
+  DECLARE SUB somesub (arg AS FLOAT) STATIC
+  REM -- the subroutine will be implemented later but it is already callable
+  CALL somesub(3.1415)
+  REM -- the bottom of the program
+  SUB somesub (arg AS FLOAT) STATIC
+    PRINT "two times the argument is: "; arg * 2.0
+  END SUB
+
+<adm warning>
+The implementation of the subroutine later in the code must use the same number and type of arguments as the declaration. Overloading is still possible, though: you may declare overloaded variations of the subroutine and implement each variation later on in the program.
+</adm>
+===== Subroutine Visibility =====
+
+Subroutines, as well as variables, may be defined with different visibility levels. XC=BASIC offers two options:
+
+  * //Global// visibility: the subroutine is callable from within the entire code module it was defined (but not outside the code module).
+  * //Shared// visibility: the subroutine is callable from within all code modules.
+
+<adm note>
+The default visibility for subroutines is //global//.
+</adm>
+
+To define a subroutine as shared, append the ''SHARED'' keyword to its definition:
+
+  SUB <subroutine_name> (arg AS <type>) SHARED
+  
+  END SUB
+
+This will ensure the subroutine is callable from within other code modules. Read more about [[code_modules|Code Modules here]].
+
+<- flowcontrol|Previous page ^ subroutines|Subroutines ^ functions|Next page ->
+

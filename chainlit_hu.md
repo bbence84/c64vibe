@@ -1,13 +1,13 @@
 # VibeC64 - MI alapú Commodore 64 játékfejlesztés
 
-Üdvözöl a **VibeC64**, az AI-asszisztensed Commodore 64 BASIC V2.0 játékok készítéséhez!
+Üdvözöl a **VibeC64**, az AI-asszisztensed Commodore 64 játékok készítéséhez!
 
 ## Mire képes a VibeC64?
 
 A VibeC64 egy intelligens AI-asszisztens, amely segít életre kelteni retro játékötleteidet. A következőkre képes:
 
 - 🎨 **Játéktervezés** – A játékötleteidet részletes tervekké alakítja: történettel, karakterekkel, helyszínekkel és játékmenet-mechanikákkal.
-- 💻 **C64 BASIC V2.0 kódírás** – Szintaktikailag helyes BASIC programokat generál, amelyek valódi Commodore 64 hardveren is futtathatók.
+- 💻 **C64 program kódírás** – Szintaktikailag helyes BASIC programokat generál, amelyek valódi Commodore 64 hardveren is futtathatók.
 - 🔍 **Szintaxis ellenőrzése és javítása** – Automatikusan ellenőrzi a kódot és kijavítja a szintaktikai hibákat.
 - 💾 **Programok exportálása** – Letöltheted alkotásaidat .BAS és .PRG fájlformátumban.
 - 🎮 **Játék indítása C64 emulátorban** – Alternatív megoldásként az elkészült programot közvetlenül megnyithatod egy online [C64 emulátorban](https://ty64.krissz.hu/).
@@ -26,7 +26,7 @@ A kezdés egyszerű – csak írd le (egyelőre angolul a legbiztosabb, de magya
 ### Az program létrehozás folyamata:
 
 1. **Tervezés** – Részletes játéktervet készít a leírásod alapján.
-2. **Kódolás** – Legenerálja a teljes C64 BASIC V2.0 forráskódot.
+2. **Kódolás** – Legenerálja a teljes C64 program forráskódot.
 3. **Validálás** – Ellenőrzi a szintaktikai hibákat és automatikusan javítja őket.
 4. **Indítás** – Lefuttatja a játékot valódi hardveren (ha csatlakoztatva van).
 5. **Kipróbálás** – Letölthető .BAS és .PRG fájlokat biztosít, vagy megnyitja a játékot az emulátorban.

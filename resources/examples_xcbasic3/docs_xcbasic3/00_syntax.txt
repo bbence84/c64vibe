@@ -1,0 +1,96 @@
+====== Syntax ======
+
+===== Vocabulary =====
+
+The following reserved keywords form the basic vocabulary of the language. The keywords may be spelled with either upper or lower case letters, or a mix of both. Therefore ''PRINT'', ''print'' and ''Print'' are equivalent.
+
+<html><tt>
+AND AS ASM BACKGROUND BORDER BYTE CALL CASE CHARAT CLOSE CONST CONTINUE DATA DECIMAL DECLARE DIM DO DOKE ELSE END ERR
+OR EXIT FAST FILTER FLOAT FOR FUNCTION GET GOSUB GOTO HSCROLL IF INCBIN INCLUDE INLINE INPUT INT INTERRUPT LET LOAD LOCATE LONG LOOP MEMCPY MEMSET MEMSHIFT MOD NEXT NOT OFF ON OPEN OPTION OR ORIGIN OVERLOAD POKE PRINT PRIVATE RANDOMIZE RASTER READ REM RETURN SAVE SCREEN SELECT SHARED SOUND SPRITE STATIC STEP STRING SUB SWAP SYS SYSTEM
+ TEXTAT THEN TIMER TO TYPE UNTIL VMODE VOICE VOLUME VSCROLL WHILE WORD WRITE XOR
+</tt></html>
+
+<adm note>
+In XC=BASIC (unlike CBM BASIC) you must separate keywords from each other or from other identifiers with at least one space. This will not impose any speed or size penalty on the compiled program.
+</adm>
+===== Identifiers =====
+
+Identifiers are used to name constants, variables, labels, subs and functions in XC=BASIC. You may choose identifiers as you wish, following these rules:
+
+  - The first character must be alphabetic or an underscore (''_'') character
+  - The remaining characters must be alphabetic, numeric, or the underscore (''_'') character
+  - The ''$'' sign may suffix the identifer, however it doesn't automatically mean that the identifier refers to a string.
+  - Either upper or lower case alphabetic characters may be used. Both are considered equivalent. Therefore ''XYZ'' and ''xyz'' are considered the same identifier.
+  - An identifer may not duplicate one of the reserved keywords in the basic vocabulary above.
+
+Identifiers can be of any length. Unlike CBM BASIC, where only the first two characters are significant, in XC=BASIC all characters are significant. The length of your identifers will not affect the size of the compiled program. For this reason, you are advised to use descriptive identifiers that are easy to read.
+
+===== Statements =====
+
+Statements can be separated using the colon ('':'') character. The separator is not required if there's only one statement in one line. The following two code pieces will be compiled to the same exact executable.
+
+  FOR i AS INT = 1 TO 5 : PRINT i : NEXT
+  
+  FOR i AS INT = 1 TO 5
+    PRINT i
+  NEXT
+
+<adm warning>
+XC=BASIC is strict when it comes to line ending. On Windows, it only interprets the CR+LF sequence ("\r\n") as line ending, while on *nix systems, the LF ("\n") character is recognized only. Make sure you convert your source files before you compile anything that was written in another OS.
+</adm>
+
+===== Comments =====
+
+Anything after a single quote (''''') character, up until the end of the line is ignored during compilation.
+
+  x = 5 ' Assigning the value 5 to the variable x
+
+The [[REM]] statement also serves to add comments. However, it must be separated from other statements using the colon ('':'') character if it is on the same line. Anything following the REM keyword up until the end of the line is ignored.
+
+  REM This is a comment
+  PRINT x : REM Outputting the value of x
+
+
+===== Whitespace =====
+
+Whitespace (e.g. spaces and tabs) are required between identifiers and keywords to avoid confusion. You are encouraged to use indentation to make the program more readable:
+
+  FOR i AS INT = 0 TO 10
+    FOR j AS INT = 0 TO 10
+      PRINT "row ", i, "column ", j
+    NEXT j
+  NEXT i
+
+===== Labels and Line Numbers =====
+
+Labels can be used to mark points in your code and are referenced by ''GOTO'' and ''GOSUB'' statements. Labels must be appended with a colon ('':'').
+
+  GOSUB intro
+  END
+  
+  intro:
+  PRINT "welcome to my program"  
+  RETURN
+
+In later sections of this tutorial you will learn more about labels and how they can be useful in your program.
+
+In addition to labels, you can use line numbers as well. Line numbers will be treated like labels by XC=BASIC. However, the following conditions apply:
+
+  * Line numbers do not have to be consecutive
+  * The colon ('':'') character must not be appended to line numbers
+  * Labels, line numbers or unnumbered/unlabeled lines can be mixed in the program
+
+===== Splitting long lines =====
+
+Starting from [v3.1], the ''_'' (underscore) character can be used to split a logical line to multiple physical lines.
+
+  ' The following is a single command split into
+  ' multiple lines for better readability
+  SPRITE 2 _
+    SHAPE 3 _
+    ON _
+    AT 50, 50 _
+    MULTI _
+    UNDER BACKGROUND
+
+<- installation_and_usage|Previous page  ^ syntax|Syntax  ^ datatypes|Next page ->

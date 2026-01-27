@@ -1,0 +1,46 @@
+====== Arithmetic expressions ======
+
+When no parentheses are present, arithmetic expressions are evaluated from left to right, with multiplication and division having a higher priority than addition and subtraction.
+
+The following table explains operator precedence in XC=BASIC:
+
+| Highest    | ''NOT'', ''-'' (unary) |
+|                 | ''*'', ''/'', ''MOD'' |
+|                 | ''+'', ''-'' |
+|                 | ''<'', ''<='', ''>'', ''='', ''>='', ''>'' |
+| Lowest    | ''AND'', ''OR'', ''XOR'' |
+
+The arithmetic operators, ''+'', ''-'', ''*'', and ''/'', work in the expected fashion, however, the result of arithmetic on type BYTE, WORD, INT or LONG cannot have a fractional result. Therefore ''5 / 2'' evaluates as 2, not 2.5. However, ''5.0 / 2.0'' evaluates as 2.5, because the presence of the decimal point tells the compiler that the numbers are of type FLOAT.
+
+  PRINT 5/2 ' Outputs 2
+  PRINT 5.0/2.0 ' Outputs 2.5
+
+Operators, except unary operators, accept two operands. These two operands do not have to be of the same type. In a mixed expression, the operands are promoted to the higher type, being BYTE the lowest and FLOAT the highest type. The table below summarizes the results of a partially evaluated expression.
+
+^              ^ BYTE            ^ WORD          ^ INT ^ LONG ^ FLOAT ^ DECIMAL ^
+^ BYTE    | BYTE          | WORD        | INT | LONG | FLOAT |  -  |
+^ WORD  | WORD        | WORD        | INT | LONG | FLOAT |  -  |
+^ INT        | INT             | INT              | INT | LONG | FLOAT |  -  |
+^ LONG   | LONG | LONG | LONG | LONG | FLOAT |  -  |
+^ FLOAT  | FLOAT        | FLOAT        | FLOAT | FLOAT | FLOAT |  -  |
+^ DECIMAL |  -  |  -  |  -  |  -  |  -  | DECIMAL |
+
+<adm note>
+DECIMAL types can not be used together with other types.
+</adm>
+
+The type of the data being operated on must be considered. For example, adding two values of type BYTE will always result in a value which is also of type BYTE, even if the result is too large to fit in a BYTE. For example, if ''x'' is a variable of type BYTE which has been previously assigned the value of 254, then the expression ''x + 4'' will NOT have a value of 258, but 2. This is because BYTE variables can only take on values between 0 and 255, so that when you add 4 to 254, the result is (258-256) = 2.
+
+Likewise, adding or multiplying two numeric literals is subject to overflow, even if the left hand side of the assignment is a variable that could otherwise fit the result.
+
+  DIM a AS INT
+  a = 250 + 6
+  PRINT a ' Outputs 0
+
+Since both 250 and 6 are of type BYTE, the result will also be of type BYTE, regardless the type of ''a''. To overcome this problem, use the typecasting functions [[v3:cbyte|]], [[v3:cword|]], [[v3:cint|]] and [[v3:cfloat|]].
+
+  DIM a AS INT
+  a = CINT(250) + CINT(6)
+  PRINT a ' Outputs 256
+
+<- operators|Previous page ^ expressions|Arithmetic expressions ^ strings|Next page ->

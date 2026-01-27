@@ -1,0 +1,50 @@
+====== Error Handling ======
+
+===== Defining an error handling routine =====
+
+Starting from XC=BASIC version 3, certain runtime errors are trappable using the ''ON ERROR GOTO'' statement. You can specify a custom error handling routine that makes it possible to recover from errors when needed. The following example demonstrates this functionality:
+
+  ON ERROR GOTO errhandler
+  DIM d$ AS STRING * 6
+  
+  start:
+    INPUT "enter divisor "; d$
+    PRINT "10/"; d$; "="; 10.0 / VAL(d$)
+    END
+  
+  errhandler:
+    IF ERR() = 20 THEN
+      PRINT "division by zero error"
+      GOTO start
+    END IF
+
+===== Getting the error code =====
+
+When an error occurs, the ''ERR()'' function returns the error code, a number between 0 and 255. The following are built-in errors in XC=BASIC:
+
+^ Code      ^ Error message       ^
+|1              |TOO MANY FILES   |
+|2              |FILE OPEN              |
+|3              |FILE NOT OPEN      |
+|4              |FILE NOT FOUND   |
+|5              |DEVICE NOT PRESENT |
+|6              |NOT INPUT FILE      |
+|7              |NOT OUTPUT FILE  |
+|8              |MISSING FILENAME|
+|9              |ILLEGAL DEVICE NUMBER |
+|10            |DEVICE NOT READY |
+|11            |OTHER READ ERROR |
+|14            |ILLEGAL QUANTITY |
+|15            |OVERFLOW |
+|20            |DIVISION BY ZERO |
+|21            |ILLEGAL DIRECT |
+
+===== User-defined errors =====
+
+Apart from the built-in errors, you can define your own error codes, too. You can use the ''ERROR'' command to trigger any error, built-in or custom.
+
+  ON ERROR GOTO errhandler
+  ERROR 99
+  END
+  errhandler:
+    IF ERR() = 99 THEN PRINT "my custom error occured" ELSE PRINT "other error"

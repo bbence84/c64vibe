@@ -1,0 +1,138 @@
+====== Control Flow Statements ======
+
+===== Conditional branching =====
+
+With the ''IF'' statement you can test a condition and then run code based on whether the condition test passed or failed.
+
+  IF <condition> THEN
+      <statements>
+  END IF
+
+The ''IF'' clause runs the statements under it when the **<condition>** is evaluated to be **TRUE** (pass). If the **<condition>** evaluates to **FALSE** (fail), nothing is run.
+
+You can optionally include **<statements>** that are run when the **<condition>** fails by adding an ''ELSE'' clause
+
+  IF <condition> THEN
+      <statements>
+  ELSE  
+      <statements>
+  END IF
+
+XC=BASIC doesn't contain a boolean data type to represent true or false, it uses a ''BYTE'' instead. The value of 0 represents **FALSE**. Any other value greater than 0 represents **TRUE**.
+
+When the **<condition>** contains a comparison operator, such as ''='' or ''>'', the result of the comparison is set to 255 when the comparison passes, and 0 when it fails. The result is then processed as normal, with 0 representing **FALSE** and any other number representing **TRUE**.
+
+If the **<condition>** is a numerical expression, such as ''1'' or ''10 - 10'', the result is evaluated the same way as previously described.
+
+==== Single Line Variation ====
+
+The ''IF'' statement can be written on a single line:
+
+  IF <condition> THEN <statements> [ELSE <statements>]
+
+One or more code **<statements>** must be added to the **THEN** clause. If multiple statements are added, they must be separated by a colon.
+
+The ''ELSE'' clause is optional, and must contain at least one code **<statement>**. Multiple statements can be used if separated by a colon.
+
+The single line ''IF'' statement runs the same as the normal multi line ''IF'' statement described in the previous section.
+
+===== Multiple branching =====
+
+The [[ON]] statement allows you to define multiple branches and an //index// expression. This expression will be evaluated as a number N and the program will continue at the Nth label in the list of branches.
+
+<adm note>
+The maximum allowed number of labels in the list is 256.
+</adm>
+
+  DIM x$ AS STRING * 8
+  INPUT "enter a number "; x$
+  ON SGN(VAL(x$)) + 1 GOTO negative, zero, positive
+  negative:
+  PRINT "you entered a negative number"
+  END
+  zero:
+  PRINT "you entered zero"
+  END
+  positive:
+  PRINT "you entered a positive number"
+
+<adm warning>
+Unlike CBM BASIC, where the first label (or line number) corresponds to the number 1, in XC=BASIC labels are zero-based. The first label is used for value 0, the second for 1, and so on.
+</adm>
+
+<adm warning>
+If index is evaluated to a number that has no matching label in the list, for example if the number is bigger than the allowed number of labels, the program may crash or behave abnormally.
+</adm>
+
+''ON'' can also be used in combination with [[GOSUB]].
+===== Looping =====
+
+==== FOR ... NEXT loop ====
+
+Syntax:
+
+  FOR <variable> [AS <type>] = <start_value> TO <end_value> [STEP <step_value>]
+    <statements>
+  NEXT [<variable>]
+
+The ''FOR ... NEXT'' loop initializes a counter variable and executes the statements until the counter variable equals the value in the ''TO'' clause. After each iteration, the counter variable is incremented by the step value or 1 in case the step value was not specified. For example:
+
+  DIM i AS BYTE
+  FOR i = 1 TO 30 STEP 3
+    PRINT i
+  NEXT i
+
+In the above, the counter variable is pre-defined. If the variable is not pre-defined, you can use the ''AS'' keyword to specify the type and this way the compiler will automatically define the variable before starting the loop. The following code is identical to the one above:
+
+  FOR i AS BYTE = 1 TO 30 STEP 3
+    PRINT i
+  NEXT i
+
+<adm warning>
+The counter variable, the start value, the end value and the step value must all be of the same numeric type and this type is concluded from the counter variable. All the other expresions will be converted to this type if possible, otherwise a compile-time error will be thrown.
+</adm>
+
+<adm note>
+The variable name can be omitted in the ''NEXT'' statement.
+</adm>
+
+You can use the ''CONTINUE FOR'' command to skip the rest of the statements in the ''FOR ... NEXT'' block and go to the next iteration, for example:
+
+  REM -- print numbers from 1 to 10, except 5 and 7
+  FOR num AS BYTE = 1 TO 10
+    IF num = 5 OR num = 7 THEN CONTINUE FOR
+    PRINT num
+  NEXT
+
+Finally, you can use the ''EXIT FOR'' statement to early exit a ''FOR ... NEXT'' loop.
+
+  DIM a$ AS STRING * 1
+  FOR i AS BYTE = 1 TO 10
+    PRINT "iteration #"; i : INPUT "do you want to continue? (y/n)"; a$
+    IF a$ = "n" THEN EXIT FOR
+    PRINT i
+  NEXT i
+
+==== DO ... LOOP loop ====
+
+The ''DO ... LOOP'' loop can be used as either a pre-test or post test loop.
+
+=== Pre-test syntax ===
+
+  DO WHILE|UNTIL <condition>
+    <statements>
+  LOOP
+
+=== Post-test syntax ===
+
+  DO
+    <statements>
+  LOOP WHILE|UNTIL <condition>
+
+The former is used to test the condition //before// entering the loop body and the latter is used to test the condition //after// each iteration. This effectively means that post-test loop will be executed at least once, whereas in a pre-test loop the condition may fail the very first time and therefore it may happen that the statements in the loop will not be executed at all.
+
+In both types, you can either use the ''WHILE'' or the ''UNTIL'' keywords. ''WHILE'' means that the loop is //entered// if the condition evaluates to true, ''UNTIL'' means that the loop is //exited// if the condition evaluates to true.
+
+Similarly to ''EXIT FOR'', you can use the ''EXIT DO'' command to prematurely exit a ''DO ... LOOP'' block, or ''CONTINUE DO'' to skip rest of the block and go to the next iteration.
+
+<- strings|Previous page ^ flowcontrol|Control Flow Statements ^ subroutines|Next page ->

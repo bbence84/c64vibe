@@ -2,7 +2,7 @@
 
 ![VibeC64 Logo](public/logo.png)
 
-VibeC64 is an AI agent specialized in creating games for the Commodore 64 computer using BASIC V2.0. It leverages modern AI models (LLMs) to design, code, test, and optionally run C64 programs on real hardware or emulators.
+VibeC64 is an AI agent specialized in creating games for the Commodore 64 computer using BASIC. It leverages modern AI models (LLMs) to design, code, test, and optionally run C64 programs on real hardware or emulators.
 
 YouTube video:
 
@@ -11,7 +11,7 @@ YouTube video:
 ## ✨ Features
 
 - **AI-Powered Game Design**: Create complete game designs based on an idea
-- **Automatic Code Generation**: Generates syntactically correct C64 BASIC V2.0 code
+- **Automatic Code Generation**: Generates syntactically correct C64 BASIC code
 - **Syntax Checking**: Built-in LLM-based and rule-based syntax validation
 - **Autonomous Gameplay / Testing**: The AI can test (play) the created game via C64 keyboard and screen capture integration (experimental)
 - **Hardware Integration**: Optional support for real C64 hardware. Only available when deployed locally.
@@ -155,7 +155,8 @@ VibeC64/
 │   └── formatting.py       # Output formatting utilities
 │
 ├── resources/              # Resource files
-│   └── examples/           # Example C64 BASIC programs (for the AI agent to learn from)
+│   └── examples_c64basic/           # Example C64 BASIC programs (for the AI agent to learn from)
+│   └── examples_xcbasic3/           # Example C64 XC=BASIC programs (for the AI agent to learn from)
 │
 ├── output/                 # Generated programs output directory
 │
@@ -178,7 +179,7 @@ VibeC64 is built on the **LangChain** AI agent framework for orchestration. The 
 The agent has access to three main tool categories:
 
 ##### **Coding Tools** (`tools/coding_tools.py`)
-- **CreateUpdateC64BasicCode**: Generates or modifies C64 BASIC code based on design plans
+- **CreateUpdateC64ProgramCode**: Generates or modifies C64 BASIC code based on design plans
 - **SyntaxChecker**: Validates code syntax using LLM or rule-based checking
 - **FixSyntaxErrors**: Automatically corrects syntax errors
 - **ConvertCodeToPRG**: Converts BASIC text to C64 PRG binary format
@@ -252,7 +253,7 @@ The complete workflow for creating a C64 game:
 graph TD
     A[User Request] --> B[DesignGamePlan Tool]
     B --> C[Game Design Document]
-    C --> D[CreateUpdateC64BasicCode Tool]
+    C --> D[CreateUpdateC64ProgramCode Tool]
     D --> E[C64 BASIC Source Code]
     E --> F[Agent State]
     F --> G[SyntaxChecker Tool]
@@ -288,7 +289,7 @@ Multi-layered validation ensures code quality:
 
 1. User: "Create a simple snake game"
 2. Agent: Uses DesignGamePlan to create detailed design
-3. Agent: Uses CreateUpdateC64BasicCode with full design plan
+3. Agent: Uses CreateUpdateC64ProgramCode with full design plan
 4. Agent: Stores code in `current_source_code` state
 5. Agent: Runs SyntaxChecker to validate
 6. Agent: If errors found, uses FixSyntaxErrors and rechecks

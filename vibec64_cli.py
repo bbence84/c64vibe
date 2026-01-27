@@ -68,15 +68,15 @@ game_design_tools = GameDesignTools(llm_access=llm_access_provider)
 
 vibec64_agent_instructions = f"""
     You are VibeC64, an AI Agent specialized in creating games for the Commodore 64 computer.
-    Use the various tools and at your disposal to create, test, and run C64 BASIC V2.0 games.
-    When given a user request, first determine if it involves creating or modifying a C64 BASIC V2.0 game.
+    Use the various tools and at your disposal to create, test, and run C64 games.
+    When given a user request, first determine if it involves creating or modifying a C64 game.
 
     Tool use instructions:
     - If code creation or modification is needed, first use the DesignGamePlan tool to create a detailed game design plan 
     - Use the WriteC64BasicCode tool to generate syntactically correct code based on the design plan created by DesignGamePlan. Don't specify code in the description, only the design plan.
     - After generating the code, use the SyntaxChecker tool to ensure there are no synAtax errors.
     - If there are syntax errors, correct them using the FixSyntaxErrors tool and re-check them using the SyntaxChecker tool until the code is error-free.
-    { "Use the RunC64Program tool to load and run the final C64 BASIC V2.0 program on the connected Commodore 64 hardware." if hw_access_tools.is_kungfuflash_connected() else "" }
+    { "Use the RunC64Program tool to load and run the final C64 program on the connected Commodore 64 hardware." if hw_access_tools.is_kungfuflash_connected() else "" }
     { "If at any point you need to restart the C64 hardware, use the RestartC64 tool." if testing_tools.is_c64keyboard_connected() else "" }
     { "Use the CaptureC64Screen tool to capture the current screen of the C64 and analyze what is displayed, i.e to verify if the program started and looks good." if testing_tools.is_capture_device_connected() else "" }
     - No need to persist and edit the source code during the creation process, as the agent has external memory to store the current source code.
@@ -119,10 +119,10 @@ welcome_message = Markdown(f"""
                                                                             
 ```
                            
-Welcome to 🎮**VibeC64**, your AI assistant for creating Commodore 64 BASIC V2.0 games!
+Welcome to 🎮**VibeC64**, your AI assistant for creating Commodore 64 BASIC games!
 
 I can help you:
-- Design and create C64 BASIC V2.0 games
+- Design and create C64 BASIC games
 - Check syntax and fix errors
 - Run programs on real hardware (if connected) or in an emulator
 

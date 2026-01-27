@@ -1,0 +1,68 @@
+====== Data Types ======
+
+XC=BASIC offers 7 built-in data types (also called //primitive types//):
+
+^Type   ^Numeric range                                        ^Size in bytes^
+|BYTE   |0 to 255                                             | 1          |
+|INT |-32,768 to 32,767                                    | 2          |
+|WORD   |0 to 65,535                                          | 2          |
+|LONG   |-8,388,608 to 8,388,607                              | 3          |
+|FLOAT  |±2.93874⨉10<sup>-39</sup> to ±1.69477⨉10<sup>38</sup>| 4          |
+|DECIMAL|0 to 9999                                            | 2          |
+|STRING |N/A                                                  |1-97       |
+
+===== Numeric types =====
+
+  * BYTE is the smallest and fastest numeric type. Bytes are typically used as array indices, counters in [[FOR]] loops, boolean (true or false) values, and many more.
+  * INT (integer) is the most commonly used type in XC=BASIC programs. Integers offer a reasonably high range of values and they support negative numbers while still being computationally fast.
+  * WORD is the unsigned version of INT. It's especially useful for specifying memory addresses, e. g in a [[POKE]] or [[PEEK]] statement.
+  * LONG is similar to INT, but its numeric range is much larger. A LONG variable reserves 3 bytes in memory.
+  * FLOATs are 32-bit floating point numbers with a 24-bit mantissa and an 8-bit exponent. They are similar to the numeric data type in CBM BASIC, but are accurate to only 6-7 decimal digits.
+
+<adm warning>
+Floating point variables have great flexibility because they can store very large and very small numbers, including a decimal fraction. However, they are manipulated much more slowly than the other types, and therefore should be used with caution and only when necessary.
+</adm>
+
+  * Finally, DECIMAL is a special type and the only reason it exists in XC=BASIC is because DECIMAL (or often called BCD - Binary Coded Decimal) numbers can be displayed on screen without the overhead of binary-decimal conversion. DECIMAL comes in handy when you want to display scores or other numeric information in a game relatively rapidly.
+
+<adm warning>
+DECIMAL has strict limitations. It only supports addition and subtraction and can not be converted to or from any other types.
+</adm>
+
+<adm note>
+When displaying decimals, all the leading zeroes will be displayed. For example the number 99 will be displayed as ''0099''.
+</adm>
+
+===== Numeric literals =====
+
+When compiling the program, the compiler must assign a type to all numbers it encounters. The compiler will identify the type of a number through the following rules:
+
+  * A number featuring a decimal dot (''.'') will be recognized as FLOAT. For example, the number ''1.0'' is a FLOAT. You //must// use a decimal point in a FLOAT, even if its fractional part is zero. Without the decimal point the compiler will treat the number as an integral number and the program might be spending precious runtime converting it back to FLOAT.
+  * A number appended with a ''d'' will be recognized as DECIMAL. For example, ''9999d'' is a valid DECIMAL.
+  * A number between 0 and 255 will be recognized as BYTE
+  * A number between -32,768 and 32,767 will be recognized as INT
+  * A number between 32,768 and 65,535 will be recognized as WORD
+  * A number between -8,388,608 and 8,388,607 will be recognized as LONG
+  * Any other number will trigger a compile-time error
+
+<adm note>
+You can use scientific notation, e.g ''1.453E-12'' when writing FLOAT literals.
+</adm>
+
+==== Numeral systems ====
+
+Numeric literals can be written in decimal, hexadecimal and binary form.
+
+  * A number prepended with a ''$'' sign is recognized as hexadecimal, for example: ''$03FF''.
+  * A number prepended with a ''%'' sign is recognized as binary, for example: ''%01110101''.
+  * Any other numbers are recognized as decimal.
+
+<adm warning>
+Binary and hexadecimal numbers are always assumed unsigned. For example the number $FFFF will be treated as 65535 (WORD) rather than -1 (INT).
+</adm>
+
+===== Strings =====
+
+Strings are fixed-length series of PETSCII characters. You can read more about strings on the [[v3:strings]] page.
+
+<- syntax|Previous page ^ datatypes|Data Types  ^ variables|Next page ->

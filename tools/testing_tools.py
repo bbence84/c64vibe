@@ -9,7 +9,6 @@ import os
 import cv2
 import time
 import base64
-import subprocess
 import logging
 from langchain.tools import tool, ToolRuntime
 from typing import Annotated, Literal, NotRequired
@@ -211,6 +210,5 @@ if __name__ == "__main__":
     # #print(testing_tools._send_text_to_c64("CTRL+Arrow", press_return=False, single_key=True))
 
     print(get_webcam_snapshot())
-# # #     #convert_c64_bas_to_prg("""C:\output\guessing_game.bas""")
 # # #     #hardware_access = C64HardwareAccess(device_port="COM3", baud_rate=19200, debug=False)
 # # #     send_prg_to_c64("""C:\output\guessing_game.prg""")    

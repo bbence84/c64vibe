@@ -16,6 +16,12 @@
   - ✓ Don't save the generated prg and bas files on the server, only offer for download
   - ✓ Open generated game in an online C64 emulator directly from the UI
 - Assembly support?
+  - Convert BASIC to Assembly?
+- Art pipeline:
+  - Ability to import SpriteMate files and display them
+  - Invoke nanobanana for image generation, convert it to sprite
+  - How to generate background image
+  - Mix and combine multiple sprites
 - ✓ Analyze the game creation request and indicate if the game requested might be too complex for BASIC
 - HIGH_PRIO: Catch HTTP errors and report back to the user, check usual errors, too many tokens, limit reached
 - ✓ Capture device support for screen capture tool redo
@@ -25,14 +31,14 @@
 - Check if thinking mode is better vs. non thinking mode for Gemini, check reasoning traces, ability to switch reasoning effort
 - Test case generation and execution
 - Fix file save https://github.com/langchain-ai/deepagents/pull/336
-- (PRO) Registration, persist conversations and allow loading previous sessions
-- (PRO) Sprite and graphic asset generation tools using generative AI models and convert to C64 formats
-- (PRO) Sound effect and music generation tools
+- Registration, persist conversations and allow loading previous sessions
+- Sprite and graphic asset generation tools using generative AI models and convert to C64 formats
+- Sound effect and music generation tools
 - ✓ Instruction to immediately start outputting a confirmation when the agent starts
 - ✓ Clean up for open-source release
 - ✓ Improve error handling and logging
 - ✓ Support OpenRouter
-- ✓ Extend CreateUpdateC64BasicCode tool to update existing code based on user feedback
+- ✓ Extend CreateUpdateC64ProgramCode tool to update existing code based on user feedback
 - ✓ Pass whole game design plan to the code writing tool instead of just short description
 - ✓ Implement C64 "hardware" functions (loading/running/stopping programs, sending text to screen, restarting)
 - ✓ Use LangChain states for passing source code and large tool inputs / outputs in the context

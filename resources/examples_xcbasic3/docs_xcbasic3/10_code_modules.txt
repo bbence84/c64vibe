@@ -1,0 +1,56 @@
+====== Code Modules ======
+
+A Code Module (or simply module) is a file containing XC=BASIC statements. An XC=BASIC program consists of one or more modules.
+
+<adm note>
+Modules usually have the //.bas// extension, although the compiler does not care about the extension. The //.bas// extension is to help text editors to detect what kind of code you're editing.
+</adm>
+
+Although completely optional, it is a good idea to organize code in multiple modules for better readability and maintainability if the program is growing exceedingly large.
+
+===== Including modules =====
+
+The [[INCLUDE]] directive instructs the compiler to load the given module, compile it, and "inject" the code into the current module at the exact point where the ''INCLUDE'' directive is.
+
+//main.bas//
+  REM -- a simple game
+  INCLUDE "instructions.bas"
+  INCLUDE "play.bas"
+  CALL instructions ()
+  DO
+    CALL gameplay ()
+  LOOP WHILE 1
+//instructions.bas//
+  SUB instructions () SHARED STATIC
+    PRINT "welcome. use joystick in port 2. press fire to jump."
+  END SUB
+//play.bas//
+  SUB gameplay () SHARED STATIC
+    ' actual game code here...
+  END SUB
+
+The above example is a program that consists of three modules. The main module is //main.bas// and it includes two other modules, //instructions.bas// and //play.bas//.
+
+As opposed to other languages, like C for example, you do not have to compile each module and have a linker to link them in one executable. You only have to compile the main module and the rest will be resolved by the compiler.
+
+<adm note>
+Included modules are resolved recursively. You can include modules in included modules, to any depth.
+</adm>
+
+Refer to the [[INCLUDE]] page to learn more - for example, how the compiler resolves the path of included modules.
+
+===== Sharing identifiers among modules =====
+
+<adm note>
+We'll use the term "identifier" to refer to variables, constants, subroutines and functions.
+</adm>
+
+As you might have previously read [[variables#variable_scope|here]] and [[subroutines#subroutine_visibility|here]], variables, as well as constants, subroutines and functions, have three levels of visibility. The default visibility is GLOBAL, which means that the identifier is visible everywhere within the module where it was defined but not in other modules. The exception to this rule is when a variable or constant is defined within a subroutine or function. In this case, the default visibility is LOCAL.
+
+To share an identifier with other modules, you must use the [[SHARED]] keyword. A few examples:
+
+  SHARED CONST PI = 3.14159
+  DIM a AS INT SHARED
+  SUB clear_screen () SHARED STATIC
+
+

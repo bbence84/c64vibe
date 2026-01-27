@@ -1,0 +1,89 @@
+====== Strings ======
+
+Strings are fixed-length series of PETSCII characters. The maximum length of a string is 96 characters.
+
+===== String literals =====
+
+String literals must be enclosed between double quote (''"'') characters and may contain any ASCII character. Every ASCII character that has a PETSCII equivalent will be translated to PETSCII.
+
+For characters that don't have an ASCII equivalent, you can use PETSCII escape sequences. An escape sequence is a number or an alias in curly braces. For example:
+
+  PRINT "{CLR}" : REM clear screen
+  PRINT "{147}" : REM same as above
+  PRINT "{WHITE}text in white"
+
+Refer to [[:petscii_escape_sequences|this page]] for all supported escape sequences.
+===== Defining string variables =====
+
+As opposed to numeric variables, string variables cannot be implicitly defined. You must use the ''DIM'' keyword to create a variable of STRING type. The statement must define the variable name, the type, and the maximum string length, as in this example:
+
+  DIM varname$ AS STRING * 16
+  
+This will create a STRING variable named ''varname$'' with a maximum length of 16 characters.
+
+<adm note>
+The ''$'' postfix in the variable name is optional and may be omitted.
+</adm>
+
+<adm warning>
+The maximum allowed string length is 96 characters.
+</adm>
+===== Value assignment =====
+
+Variables of STRING type, just like any other variables, may be assigned values using the ''='' operator:
+
+  varname$ = "hello world"
+  
+There's one caveat that you must be aware of: if the right-hand side of the assignment is longer than the variable's maximum length, the string will be truncated to fit into the variable. For example:
+
+  DIM varname$ AS STRING * 5
+  varname$ = "hello world"
+  PRINT varname$ : REM will output "hello"
+  
+<adm warning>
+Strings will be truncated to the maximum length that will fit into the variable. So if a STRING variable was defined with a length of 32, for example, then only the first 32 string characters of the assigned value will be stored.
+</adm>
+===== String operators =====
+
+Use the ''+'' operator to concatenate two strings.
+
+  DIM name$ AS STRING * 16
+  DIM greet$ AS STRING * 23
+  INPUT "enter your name: "; name$
+  greet$ = "hello, " + name$
+  
+You can use the comparison operators ''='' and ''<>'' to verify two strings are identical.
+===== String functions =====
+
+You can find all functions that operate on strings on the [[functionref]] page.
+
+===== Direct string manipulation =====
+
+If you intend to manipulate strings directly, for example to examine and/or replace individual characters, you may use [[PEEK]] and [[POKE]] to read and write individual characters within strings. For this you must understand how strings are stored in memory. When you define a string variable, as in this example:
+
+  DIM mystr$ AS STRING * 8
+
+...the compiler will allocate 9 bytes in memory - one for holding the string length, and the rest for the characters that make up the string value. Now when you assign a value to this variable, such as:
+
+  mystr$ = "hello"
+
+...the memory area will be set like this (numbers in hexadecimal):
+
+{{:v3:str_hello.png?nolink&400|}}
+
+The first byte will contain the string length (five characters in this case) and the following 5 bytes will represent the encoded PETSCII characters. Since the fixed size of this string is 8 characters, but the actual string is only 5 characters long, the last three bytes are unused and their values are undefined and insignificant. However, XC=BASIC does not perform "garbage collection" like some others languages do, so those 3 bytes will remain in memory for the entire runtime of the program as unused space unless you alter the string by assigning a new value. Therefore, for the sake of efficient memory use, it is best to ensure all strings are defined to a length that is as short as possible for the needs of the program.
+
+The "@" operator returns the memory address of a variable. With this address, you can easily manipulate the string. For example, you can change its first character to an "A", as in the following example:
+
+  POKE @mystr$ + 1, 65
+  PRINT mystr$
+
+Here is how the compiler will handle this example:
+
+  * The expression ''@mystr$'' will be resolved to the address of ''mystr$'' as a WORD. This is the 1st byte of the string in memory, the one that holds the length of the string.
+  * Adding 1 will resolve to the first character of the string (2nd byte).
+  * The number 65 is the PETSCII-code of the letter 'A'
+
+If the above code is compiled and run, the output will be "AELLO".
+
+<- expressions|Previous page ^ strings|Strings ^ flowcontrol|Next page ->

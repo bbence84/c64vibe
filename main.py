@@ -104,15 +104,15 @@ async def initialize_agent():
     
     vibec64_agent_instructions = f"""
     You are VibeC64, an AI Agent specialized in creating games for the Commodore 64 computer.
-    Use the various tools at your disposal to create, test, and run C64 BASIC V2.0 games.
-    When given a user request, first determine if it involves creating or modifying a C64 BASIC V2.0 game.
+    Use the various tools at your disposal to create, test, and run C64 games.
+    When given a user request, first determine if it involves creating or modifying a C64 program source code.
 
     Right at the beginning of the game creation or modification process, don't start using the tools right away, but emit a short statement that the process has been started and mention the initial steps you will take. Don't use Chinese though fragments.
 
     Tool use instructions:
     - If code creation or modification is needed, first use the DesignGamePlan tool to create a detailed game design plan 
-    - Use the CreateUpdateC64BasicCode tool to generate syntactically correct code based on the design plan created by DesignGamePlan. Don't specify code in the description, only the design plan.
-       - The CreateUpdateC64BasicCode tool should recieve all the details from the game design plan, how the code should be generated, what features to include etc.
+    - Use the CreateUpdateC64ProgramCode tool to generate syntactically correct code based on the design plan created by DesignGamePlan. Don't specify code in the description, only the design plan.
+       - The CreateUpdateC64ProgramCode tool should recieve all the details from the game design plan, how the code should be generated, what features to include etc.
     - After generating the code, use the SyntaxChecker tool to ensure there are no syntax errors.
     - If there are syntax errors, correct them using the FixSyntaxErrors tool and re-check them using the SyntaxChecker tool until the code is error-free.
     - No need to persist and edit the source code during the creation process, as the agent has external memory to store the current source code.
@@ -187,10 +187,10 @@ In order to use this app, you need to register an AI model provider account thro
     
     welcome_message = f"""## VibeC64 (BETA) - AI-Powered Commodore 64 Game Creator 
 
-Welcome to **VibeC64**, your AI assistant for creating Commodore 64 BASIC V2.0 games!
+Welcome to **VibeC64**, your AI assistant for creating Commodore 64 games!
 
 I can help you:
-- Design and create C64 BASIC V2.0 games
+- Design and create C64 games
 - Check syntax and fix errors (even after creating the game)
 - Run programs on real hardware (if connected) or in an emulator
 ### Hardware Status
@@ -349,7 +349,7 @@ async def change_agent_settings(settings):
 
     llm_access_provider = cl.user_session.get("llm_access_provider")
 
-    if llm_access_provider and llm_model and api_key:
+    if llm_access_provider and llm_model and api_key != "":
 
         set_llm_success = llm_access_provider.set_llm_model(model_name=llm_model, api_key=api_key, use_openrouter=use_openrouter)
         if not set_llm_success:

@@ -130,7 +130,7 @@ class ChainlitMiddlewareTracer(AgentMiddleware if AgentMiddleware != object else
             case "WriteTodos":
                 tool_command = cast(Command, tool_output)
                 return await self._format_todos(tool_command.update.get("todos", [])), "markdown"
-            case "CreateUpdateC64BasicCode" | "StoreSourceInAgentMemory":
+            case "CreateUpdateC64ProgramCode" | "StoreSourceInAgentMemory":
                 tool_command = cast(Command, tool_output)
                 return tool_command.update.get("current_source_code", ""), "basic"
             case "SyntaxChecker":
@@ -170,7 +170,7 @@ class ChainlitMiddlewareTracer(AgentMiddleware if AgentMiddleware != object else
             return {}, None, False
         
         match tool_name:
-            case "CreateUpdateC64BasicCode":
+            case "CreateUpdateC64ProgramCode":
                 game_design_description = tool_input.get("game_design_description", "")
                 change_instructions = tool_input.get("change_instructions", "")
                 if change_instructions != "":

@@ -1,0 +1,58 @@
+====== Functions ======
+
+Functions in XC=BASIC are essentially the same as [[subroutines|Subroutines]], with one important difference: functions //must// return a value. Everything else that is described on the [[subroutines|previous page]] is true for functions and will not be repeated here.
+
+===== Defining the return type =====
+
+A function must always return a type, that is, the type of the value that it returns. You must define the return type in the function definition line using the ''AS'' keyword:
+
+  FUNCTION <fn_name> AS <type> (<arg> AS <type>)
+    <statements>  
+  END FUNCTION
+
+===== Calling a function =====
+
+Functions can not be called using the ''CALL'' keyword, but rather they must be invoked as part of an expression. A function call is treated like an expression and its type is concluded from the function's return type. For example:
+
+  FUNCTION test AS LONG ()
+    REM -- function body here
+  END FUNCTION
+  
+  x = test()
+  REM -- The variable x will be implicitly defined as LONG
+  REM -- because the right hand side is a LONG type
+
+<adm note>
+For the above reason, there are no void functions in XC=BASIC. [[subroutines|Subroutines]] serve as void functions.
+</adm>
+===== Returning a value =====
+
+There are two ways to return a value from a function:
+
+  * The QBASIC style, by assigning a value to the function name.
+  * Using the ''RETURN'' keyword.
+
+Both styles are accepted in XC=BASIC. Here are two examples to demonstrate each:
+
+  REM -- returning value the QBASIC style
+  FUNCTION test AS BYTE ()
+    test = 42
+  END FUNCTION
+  PRINT test() : REM will output 42
+
+  REM -- returning value using the RETURN keyword
+  FUNCTION test AS BYTE ()
+    RETURN 42
+  END FUNCTION
+  PRINT test() : REM will output 42
+
+The above two codes are identical, but the ''RETURN'' keyword comes with a restriction: it immediately exits the function. There can be, however, situations where you want to continue executing the function even after specifying the return value, for example:
+
+  (TODO: provide example)
+
+Note the use of the ''EXIT FUNCTION'' command that is used to early exit the function.
+
+<adm warning>
+If the code exits from a function before any return value was specified, an undefined value will be returned.
+</adm>
+

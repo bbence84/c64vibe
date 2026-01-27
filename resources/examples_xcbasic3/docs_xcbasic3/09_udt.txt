@@ -1,0 +1,123 @@
+====== User-Defined Types ======
+
+User-defined types (or UDT's) allow you to create your own data structures. In its simplest form, a type definition is a bunch of field definitions inside a ''TYPE ... END TYPE'' block. The following example illustrates a very simple type definition:
+
+  TYPE EMPLOYEE
+    firstname AS STRING * 16
+    lastname AS STRING * 16
+    salary AS LONG
+  END TYPE
+
+A type can have any number of fields, but there is one restriction: the size of a single instance of the type may not exceed 64 bytes. In the above example, //firstname// and //lastname// take up 17 bytes each, and //salary//, being of LONG type takes 3 bytes. That's 37 bytes total, well below the limit.
+
+Having defined the new type as above, you can define variables of EMPLOYEE type and assign values to its fields using the dot (''.'') notation:
+
+  DIM emp AS EMPLOYEE
+  emp.firstname = "Mark"
+  emp.lastname = "Cunnigham"
+  emp.salary = 45500
+
+To read a field value you can use the same dot-notation:
+
+  PRINT emp.firstname : REM outputs: "Mark"
+
+<adm note>
+Variables defined as UDT's are called //instances// of that type. In the above example, ''emp'' is an //instance// of the EMPLOYEE type.
+</adm>
+===== Arrays of user defined types variables =====
+
+Multiple instances of UDT's can be organized in arrays, for example:
+
+  DIM employees(50) AS EMPLOYEE
+
+Now to access field values of a specific member in the array, you can combine the array notation and the dot notation:
+
+  DIM sum AS LONG : sum = 0
+  FOR i AS BYTE = 0 TO 49
+    sum = sum + employees(i).salary
+  NEXT i
+  PRINT "the average salary at the company is "; sum / 50
+
+<adm warning>
+Arrays can be dimensioned as user-defined type, however TYPE definitions cannot contain array fields.
+</adm>
+===== Nested UDT's =====
+
+A field in a TYPE definition can be of another TYPE, and so on, as long as a single insance does not exceed the 64 bytes limit explained above.
+
+  TYPE VECTOR
+    x AS INT
+    y AS INT
+  END TYPE
+  
+  TYPE SPRITE
+    pos AS VECTOR
+    color AS BYTE
+  END TYPE
+
+To access fields within the nested type, you can extend the dot notation like in the following example:
+
+  DIM monster AS SPRITE
+  monster.pos.x = 160
+  monster.pos.y = 100
+  monster.color = 3
+
+===== Type methods =====
+
+You can define [[Subroutines]] and [[Functions]] within a type declaration that allows you to define routines that work with data in a single instance of that type. These routines are called //type methods// and are very similar to object methods in object-oriented programming. Extending the example above, let's write a routine that moves the imaginary monster on the horizontal axis:
+
+  TYPE VECTOR
+    x AS INT
+    y AS INT
+  END TYPE
+  
+  TYPE SPRITE
+    pos AS VECTOR
+    color AS BYTE
+    SUB move (amount AS INT) STATIC
+      THIS.pos.x = THIS.pos.x + amount
+    END SUB
+  END TYPE
+  
+  DIM monster AS SPRITE
+  monster.pos.x = 100
+  CALL monster.move(5)
+  PRINT monster.pos.x : REM outputs 105
+
+===== The THIS keyword =====
+
+
+Note the usage of the [[THIS]] keyword in the above example. ''THIS'' is a special variable that refers to the instance on which the method was called. In the above example, ''THIS'' refers to the variable that the ''move'' method was called on, in this case: //monster//.
+
+<adm note>
+Adding methods to a TYPE definition does not increase an instance's size and therefore methods do not count in the 64 bytes size limit.
+</adm>
+
+Defining functions within type definitions allows you to write methods that return a value. The following example is a theoretical game where two players fight each other, hitting in rounds, with a random damage. The method ''hit(damage)'' subtracts the damage from a fighter's energy and the method ''isdead()'' tells if the fighter is out of energy.
+
+  TYPE FIGHTER
+    energy as INT
+    SUB hit (damage AS BYTE) STATIC
+      THIS.energy = THIS.energy - CINT(damage)
+    END SUB
+    FUNCTION isdead AS BYTE () STATIC
+      RETURN THIS.energy <= 0
+    END FUNCTION
+  END TYPE
+  
+  DIM player1 AS FIGHTER
+  DIM player2 AS FIGHTER
+  player1.energy = 1000
+  player2.energy = 1000
+  
+  RANDOMIZE TI()
+  DO
+    CALL player1.hit(CBYTE(RNDL()))
+    CALL player2.hit(CBYTE(RNDL()))
+    PRINT "p1 energy: "; player1.energy; ", p2 energy: "; player2.energy
+  LOOP UNTIL player1.isdead() OR player2.isdead()
+  PRINT "game over"
+
+As seen above, you can organize code in a very well-structured way with the help of UDT's.
+ 
+<- functions|Previous page ^ udt|User-Defined Types ^ code_modules|Next page ->

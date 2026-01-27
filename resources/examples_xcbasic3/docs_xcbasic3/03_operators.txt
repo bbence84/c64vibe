@@ -1,0 +1,50 @@
+====== Operators ======
+
+XC=BASIC provides the following operators:
+
+===== Arithmetic Operators =====
+
+  * ''*'' (multiplication)
+  * ''/'' (division)
+  * ''MOD'' (modulo)
+  * ''+'' (addition or string concatenation)
+  * ''-'' (subtraction)
+
+Operands for the arithmetic operators can be any numeric expressions, with the exception of ''DECIMAL'' types that can only be operands for addition or subtraction.
+
+The ''+'' operator can also be used to concatenate strings. In this case both operands must be strings, otherwise a compile-time error is emitted.
+
+===== Relational Operators =====
+
+  * ''='' (equal to)
+  * ''<>'' (not equal to)
+  * ''>'' (greater than)
+  * ''>='' (greater than or equal to)
+  * ''<'' (less than)
+  * ''<='' (less than or equal to)
+
+Operands for the relational operators can be any numeric expressions. A relational expression evaluates to ''255'' when the comparison passes (TRUE), and ''0'' when it fails (FALSE).
+
+The relational operators ''='' and ''<>'' can also be used to compare strings. In this case both operands must be strings, otherwise a compile-time error will be emitted.
+
+<adm note>
+Comparing strings for ''>'', ''>='', ''<'' and ''<='' is not supported.
+</adm>
+
+===== Logical Operators =====
+
+  * ''AND''
+  * ''OR''
+  * ''XOR''
+  * [[SHL]] - logical shift left
+  * [[SHR]] - logical shift right
+
+Logical operators can operate on all integral types (BYTE, INT, WORD, LONG and DECIMAL).
+
+===== Unary Operators =====
+
+  * ''@'' ([[address-of|address of]])
+  * ''-'' (negation)
+  * ''NOT'' (logical reversion)
+
+<- variables|Previous page ^ operators|Operators ^ expressions|Next page ->
